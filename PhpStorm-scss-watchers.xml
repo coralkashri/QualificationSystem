@@ -1,0 +1,42 @@
+<TaskOptions>
+  <TaskOptions>
+    <option name="arguments" value="--no-cache --update --style compressed $FileName$:$ProjectFileDir$/public/resources/css/$FileNameWithoutExtension$.css" />
+    <option name="checkSyntaxErrors" value="true" />
+    <option name="description" />
+    <option name="exitCodeBehavior" value="ERROR" />
+    <option name="fileExtension" value="scss" />
+    <option name="immediateSync" value="true" />
+    <option name="name" value="scss-watcher-nodejs-hierarchy-resources" />
+    <option name="output" value="$ProjectFileDir$/public/resources/css/$FileNameWithoutExtension$.css:$ProjectFileDir$/public/resources/css/$FileNameWithoutExtension$.css.map" />
+    <option name="outputFilters">
+      <array />
+    </option>
+    <option name="outputFromStdout" value="false" />
+    <option name="program" value="sass" />
+    <option name="runOnExternalChanges" value="true" />
+    <option name="scopeName" value="nodejs-hierarchy-resources" />
+    <option name="trackOnlyRoot" value="true" />
+    <option name="workingDir" value="$FileDir$" />
+    <envs />
+  </TaskOptions>
+  <TaskOptions>
+    <option name="arguments" value="--no-cache --update --style compressed $FileName$:$ProjectFileDir$/public/css/$FileNameWithoutExtension$.css" />
+    <option name="checkSyntaxErrors" value="true" />
+    <option name="description" />
+    <option name="exitCodeBehavior" value="ERROR" />
+    <option name="fileExtension" value="scss" />
+    <option name="immediateSync" value="true" />
+    <option name="name" value="scss-watcher-nodejs-hierarchy" />
+    <option name="output" value="$ProjectFileDir$/public/css/$FileNameWithoutExtension$.css:$ProjectFileDir$/public/css/$FileNameWithoutExtension$.css.map" />
+    <option name="outputFilters">
+      <array />
+    </option>
+    <option name="outputFromStdout" value="false" />
+    <option name="program" value="sass" />
+    <option name="runOnExternalChanges" value="true" />
+    <option name="scopeName" value="nodejs-hierarchy" />
+    <option name="trackOnlyRoot" value="true" />
+    <option name="workingDir" value="$FileDir$" />
+    <envs />
+  </TaskOptions>
+</TaskOptions>
