@@ -1,0 +1,62 @@
+{
+  "plans": [
+    {
+      "name": "Developer",
+      "route": [1000],
+      "description": "plan_description",
+      "estimated_days": 60
+    }
+  ],
+  "tasks": [
+    {
+      "_id": 1000,
+      "name": "task_name",
+      "topic": 2000,
+      "details": "Task details. What does the learner have to learn/do? Exit using ${1}.", // ${1} will be replaced according to plan_exceptions
+      "search_keywords": ["keyword1", "keyword2", "keyword3"],
+      "check_point": "NONE", // enum: ["NONE", "SOFT", "STRONG"]
+      "task_type": "TEXT", // enum: ["TEXT", "CODE", "NUMBER", "BOOLEAN"]
+      "judgment_criteria": ["criteria1", "criteria2", "criteria3", "${2}"], // ${2} will be replaced according to plan_exceptions
+      "hints": ["hint1", "hint2", "hint3", "${3}"], // ${3} will be replaced according to plan_exceptions
+      "plan_exceptions": [
+        { // Exception 1 block
+          "plans": [
+            {
+              "name": "Developer",
+              "text": "Ctrl+C"
+            }, {
+              "name": "Researcher",
+              "text": "Special keyword"
+            }
+          ]
+        }, { // Exception 2 block
+          "plans": [
+            {
+              "name": "Developer",
+              "text": "Clear code"
+            }
+          ]
+        }, { // Exception 3 block
+          "plans": [
+            {
+              "name": "Researcher",
+              "text": "Use std::vector"
+            }
+          ]
+        }
+      ],
+      "answer": "" // TODO
+    }
+  ],
+  "topics": [
+    {
+      "_id": 2000,
+      "name": "topic_name",
+      "description": "topic_description"
+    }, {
+      "_id": 2001,
+      "name": "topic_name_1",
+      "description": "topic_description_1"
+    }
+  ]
+}
