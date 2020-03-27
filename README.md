@@ -1,1 +1,1 @@
-Example project: [VersionsTrack](https://github.com/korelkashri/VersionsTrack)
+A qualification system for new team members.
