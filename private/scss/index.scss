@@ -1,0 +1,13 @@
+@charset "UTF-8";
+
+// Materialize variables
+@import "../resources/scss/materialize/components/color-variables";
+@import "../resources/scss/materialize/components/variables";
+@import "../resources/scss/materialize/components/color-classes";
+
+// Variables
+@import "components/variables";
+
+@import "components/menu-icon";
+@import "components/search";
+@import "components/global";

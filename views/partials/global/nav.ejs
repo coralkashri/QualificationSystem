@@ -1,0 +1,170 @@
+<div class="dismiss_area"></div>
+
+<div class="preloader-wrapper big circular-preloader">
+    <div class="spinner-layer spinner-yellow">
+        <div class="circle-clipper left">
+            <div class="circle"></div>
+        </div><div class="gap-patch">
+            <div class="circle"></div>
+        </div><div class="circle-clipper right">
+            <div class="circle"></div>
+        </div>
+    </div>
+
+    <div class="spinner-layer spinner-blue-only">
+        <div class="circle-clipper left">
+            <div class="circle"></div>
+        </div><div class="gap-patch">
+            <div class="circle"></div>
+        </div><div class="circle-clipper right">
+            <div class="circle"></div>
+        </div>
+    </div>
+
+    <div class="spinner-layer spinner-red">
+        <div class="circle-clipper left">
+            <div class="circle"></div>
+        </div><div class="gap-patch">
+            <div class="circle"></div>
+        </div><div class="circle-clipper right">
+            <div class="circle"></div>
+        </div>
+    </div>
+
+    <div class="spinner-layer spinner-green">
+        <div class="circle-clipper left">
+            <div class="circle"></div>
+        </div><div class="gap-patch">
+            <div class="circle"></div>
+        </div><div class="circle-clipper right">
+            <div class="circle"></div>
+        </div>
+    </div>
+</div>
+
+<!--Side NavBar-->
+<ul id="slide-out" class="sidenav left-aligned flow-text">
+    <li>
+        <div style="display: flex; align-items: center;" class="user-view">
+            <% if (is_logged_in) { %>
+                <i style="font-size: 40px; padding-right: 5px" class="fa fa-user-circle"></i><span><%=username%></span>
+            <% } %>
+        </div>
+    </li>
+    <% if (is_logged_in) { %>
+        <li>
+            <a href="/view/disconnect"><i class="fa fa-sign-out-alt"></i>Logout</a>
+        </li>
+        <!--<li>
+            <a href="/view/users/profile"><i class="fa fa-user-edit"></i>Edit Profile</a>
+        </li>-->
+    <% } else { %>
+        <li>
+            <a href="/view/login"><i class="fa fa-sign-in-alt"></i>Login</a>
+        </li>
+    <% } %>
+    <li>
+        <a href="/view/versions"><i class="fa fa-stream"></i>Versions List</a>
+    </li>
+    <% if (is_logged_in && access_level >= min_access_required.project_min_access_required.view_admin_panel) { %>
+        <li>
+            <a href="/view/admin-panel"><i class="fa fa-toolbox"></i>Admin Panel</a>
+        </li>
+    <% } %>
+</ul>
+
+<!--Top NavBar-->
+<div id="page_sticky_header" class="sticky-action">
+    <div class="row" ng-hide="version_edit_progress.is_active">
+        <div style="position: fixed; margin-left: 1rem;" class="left" id="side-nav-button">
+            <a href="#" data-target="slide-out" class="sidenav-trigger">
+                <div class="menu-icon-2">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </a>
+        </div>
+
+        <% if (page == "versions") { %>
+            <div class="left search-container sticky-action">
+                <a ng-click="open_search('quick');" class="open-quick-search show-on-large hide-on-med-and-down">
+                    <i ng-click="search(false, true);" class="quick-search-icn material-icons small">search</i><!--Quick Search-->
+                    <i ng-click="open_search('full');" class="full-search-icn fab fa-searchengin small"></i><!--Advanced Search-->
+                </a>
+                <a ng-click="clear_and_close_search();" class="close-search-btn show-on-large hide-on-med-and-down">
+                    <i class="close-search-icn material-icons small">close</i><!--Clear Search-->
+                </a>
+                <a ng-click="open_search('full');" class="show-on-medium-and-down hide-on-large-only open-full-search">
+                    <i class="material-icons small">search</i>
+                </a>
+            </div>
+        <% } %>
+
+        <span class="hide-on-med-and-down">
+            <% if (page == "versions") { %>
+                <!--Searching Part-->
+                <div class="quick-search-toolbox col s8 offset-s2">
+                    <!--Data input type selection-->
+                    <div class="input-field col s3">
+                        <select id="reports_type_filter_select" ng-model="versions_filter_type_select_model" ng-change="change_data_input_type('quick_search_toolbox');" ng-init="versions_filter_type_select_model='ver'">
+                            <option value="ver">Version</option>
+                            <option value="date">Date</option>
+                            <option value="desc">Description</option>
+                        </select>
+                        <label for="reports_type_filter_select">Search Type</label>
+                    </div>
+
+                    <!--Data input in case of VersionID or Description-->
+                    <div class="input-field col"
+                         ng-show="versions_filter_type_select_model !== 'date'"
+                         ng-class="[{'s9': versions_filter_type_select_model === 'desc'}, {'s3': versions_filter_type_select_model !== 'desc'}]">
+                        <input id="filter_version_data" type="text" maxlength="32" placeholder="All" ng-model="version_data_filter_model" ng-change="update_quick_full_search_btn();">
+                        <label for="filter_version_data">
+                            {{versions_filter_type_select_model == 'ver' ? "Version ID" : "Description"}}
+                        </label>
+                    </div>
+
+                    <!--Data input in case of Date-->
+                    <div class="input-field col s3"
+                         style="/*min-width: 250px;*/"
+                         ng-show="versions_filter_type_select_model === 'date'">
+                        <input type="date" id="filter_version_release_date" data-date-format="DD/MM/YYYY" ng-model="version_date_data_filter_model" ng-change="update_quick_full_search_btn();">
+                        <label for="filter_version_release_date">Release Date</label>
+                    </div>
+
+                    <!--Extra filter for VersionID base data input type [LT, Equal, GT]-->
+                    <div class="input-field col s6" ng-show="versions_filter_type_select_model == 'ver'">
+                        <select id="versions_version_type_filter_select" ng-model="versions_filter_select_model" ng-init="versions_filter_select_model='before'">
+                            <option value="before">< [Until this version]</option>
+                            <option value="equal">= [Only this version]</option>
+                            <option value="after">> [From this version and on]</option>
+                        </select>
+                        <label for="versions_version_type_filter_select">Filter</label>
+                    </div>
+
+                    <!--Extra filter for Date base data input type [LT, GT]-->
+                    <div class="input-field col s6" ng-show="versions_filter_type_select_model == 'date'">
+                        <select id="versions_date_type_filter_select" ng-model="versions_filter_select_model">
+                            <option value="before">< [Until this date]</option>
+                            <option value="equal" disabled>= [Only this version]</option>
+                            <option value="after">> [From this date and on]</option>
+                        </select>
+                        <label for="versions_date_type_filter_select">Filter</label>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="col s10 offset-s1 center">
+                    <a style="font-size: 43px;" href="/view/versions">Versions Track - <%=page_view_name%></a>
+                </div>
+            <% } %>
+        </span>
+    </div>
+    <div class="nav-content">
+        <% if (page == "versions" && access_level >= min_access_required.project_min_access_required.create_new_version) { /* >= Manager */ %>
+            <!--Open a version addition form [modal]-->
+            <a class="btn-large btn-floating modal-trigger halfway-fab waves-effect waves-light accept-color" href="#new_version_modal" ng-hide="version_edit_progress.is_active"><i class="material-icons">add</i></a>
+        <% } %>
+    </div>
+</div>

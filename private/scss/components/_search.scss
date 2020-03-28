@@ -1,0 +1,146 @@
+$search-btn-animation-time: 2s;
+.search-container {
+  position: fixed;
+  margin-left: 4rem;
+  transition: all $search-btn-animation-time !important;
+  width: 100vw;
+  height: $page-sticky-header-height;
+  background-color: $page-sticky-header-bg;
+  z-index: 3;
+  top: 0;
+
+  &:before {
+    content: "";
+    $width: 1em;
+    width: $width;
+    margin-left: -$width;
+    height: $page-sticky-header-height;
+    position: absolute;
+    background-color: rgba($page-sticky-header-basic-bg, 0.9);
+  }
+
+  a {
+    height: $page-sticky-header-height - 10px;
+    color: white;
+    display: block;
+    position: absolute;
+
+    i {
+      position: absolute;
+      top: 34%;
+      transition: all $search-btn-animation-time + 1s, opacity 1s;
+      cursor: pointer;
+
+      // Default state
+      &.quick-search-icn {
+        opacity: 1;
+        z-index: 1;
+      }
+      &.full-search-icn {
+        opacity: 0;
+        z-index: 0;
+      }
+    }
+    &.close-search-btn {
+      display: none !important;
+    }
+  }
+
+  ~ span .quick-search-toolbox {
+    opacity: 0;
+    transition: opacity 0.01s $search-btn-animation-time;
+  }
+
+  &.apply-search-container, &.full-search-btn-container {
+
+    @media #{$large-and-up} {
+      & {
+        transform: translateX(80%);
+      }
+
+      i {
+        transform: rotate(360deg);
+      }
+    }
+    .close-search-btn {
+      transform: translateX(3em);
+      display: block !important;
+    }
+
+    ~ span .quick-search-toolbox {
+      opacity: 1;
+      transition: opacity 0.01s;
+    }
+  }
+
+  &.apply-search-container {
+    i {
+      &.quick-search-icn {
+        opacity: 1;
+        z-index: 1;
+      }
+
+      &.full-search-icn {
+        opacity: 0;
+        z-index: 0;
+      }
+    }
+  }
+
+  &.full-search-btn-container {
+    i {
+      &.quick-search-icn {
+        opacity: 0;
+        z-index: 0;
+      }
+
+      &.full-search-icn {
+        opacity: 1;
+        z-index: 1;
+      }
+    }
+  }
+}
+
+.quick-search-toolbox {
+  * {
+    //color: white;
+  }
+}
+
+#advanced_search_by_description {
+  .adv-search-param {
+    padding-bottom: 5px;
+
+    .adv-search-title {
+      [type="checkbox"].filled-in:checked + span:not(.lever):after {
+        background-color: $advanced-search-input-bg-color;
+        border-color: $advanced-search-input-bg-color;
+      }
+    }
+
+    .adv-search-slider {
+      input {
+        margin: 0;
+        + .thumb {
+          background-color: $advanced-search-input-bg-color;
+        }
+        &[type=range] {
+          &::-webkit-slider-thumb {
+            background-color: $advanced-search-input-bg-color;
+          }
+          &::-moz-range-thumb {
+            background-color: $advanced-search-input-bg-color;
+          }
+          &::-ms-thumb {
+            background-color: $advanced-search-input-bg-color;
+          }
+        }
+      }
+      label {
+        position: relative;
+        top: -10px;
+      }
+    }
+  }
+}

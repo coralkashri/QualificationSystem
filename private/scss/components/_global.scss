@@ -1,0 +1,140 @@
+#page_content {
+  min-height: 90vh;
+}
+
+#page_sticky_header {
+  width: 100%;
+  background-color: $page-sticky-header-bg;
+  position: fixed;
+  padding-top: 8px;
+  height: $page-sticky-header-height;
+  z-index: 2;
+
+  .nav-content {
+    * {
+      z-index: 3;
+    }
+  }
+}
+.sticky-action {
+  &.collapse {
+    animation: collapse 300ms ease forwards;
+  }
+
+  &.open {
+    animation: open 300ms ease forwards;
+  }
+
+  &.home {
+    -webkit-transition: background-color 300ms cubic-bezier(0.6, 0.3, 0.8, 0.8);
+    transition: background-color 300ms cubic-bezier(0.6, 0.3, 0.8, 0.8);
+  }
+}
+
+.ng-enter {
+  -webkit-transition: 1s;
+  transition: 1s;
+  opacity: 0;
+}
+
+.ng-enter-active {
+  opacity: 1;
+}
+
+.pages-bg {
+  background-color: rgba(184, 229, 254, 0.53);
+}
+
+.page-footer {
+  padding-top: 20px;
+  color: #fff;
+  opacity: 1;
+
+  .footer-copyright {
+    overflow: hidden;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    padding: 0 0;
+    color: black;
+    background-color: rgba(0, 0, 0, 0.17);
+  }
+}
+
+.light, .page-footer .footer-copyright {
+  font-weight: 100;
+}
+
+.circular-preloader {
+  position: fixed !important;
+  z-index: -1000;
+  top: 50vh;
+  left: calc(50% - 25px);
+
+  &.active {
+    z-index: 11;
+  }
+
+  @media only screen and (min-width : calc(992px + 1px)) {
+    & {
+      top: 30vh;
+    }
+  }
+
+  &.big {
+    left: calc(50% - 32px);
+  }
+
+  &.samll {
+    left: calc(50% - 18px);
+  }
+}
+
+.user-dropdown-content {
+  width: 140px !important;
+}
+
+@keyframes collapse {
+  from {
+    opacity: 1;
+    top: 0;
+  }
+  to {
+    opacity: 0;
+    top: -64px;
+  }
+}
+@keyframes open {
+  from {
+    opacity: 0;
+    top: -64px;
+  }
+  to {
+    opacity: 1;
+    top: 0;
+  }
+}
+
+body {
+  background: linear-gradient(to bottom, rgba(255,255,255,0.6) 0%,rgba(255,255,255,0.4) 100%), url(/resources/images/background5.png);
+  /*background-image: url('/resources/images/background5.png');*/
+  background-size: auto;
+  /*opacity: 0.5;*/
+  /*top: 0;*/
+  /*left: 0;*/
+  /*bottom: 0;*/
+  /*right: 0;*/
+  /*height: 100%;*/
+  /*position: absolute;*/
+  /*z-index: -1;*/
+}
+
+.selected-row {
+  background-color: rgba(137, 206, 255, 0.46);
+}
+
+.accept-color {
+  @extend .teal;
+  @extend .lighten-1;
+}

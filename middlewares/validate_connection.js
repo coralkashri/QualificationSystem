@@ -44,27 +44,12 @@ let require_login = (req, res, next) => {
 
 // req["required_level"]
 let require_access_level = (req, res, next) => {
-    let role = req.user && req.user.role || 1; // 1 -> guest
+    let role = req.user && req.user.role;
     if (req.required_level > role) {
         req.action_on_reject ? req.action_on_reject() : res.status(401).end();
     } else {
         next();
     }
-};
-
-// req["project_action_required_level"]
-let require_project_access_level = (req, res, next) => {
-    const projects_db_model = database.projects_model();
-    let system_role = req.user && req.user.role || 1; // 1 -> guest
-    let project = requests_handler.require_param(req, 'route','project_name');
-    let project_role = projects_db_model.find({name: project, "members_list.username": req.user.username}, (err, data) => {
-        if (err) throw err;
-        if (!data.length || !system_role || req.project_action_required_level > project_role) {
-            req.action_on_reject ? req.action_on_reject() : res.status(401).end();
-        } else {
-            next();
-        }
-    }).exec();
 };
 
 let require_logout = (req, res, next) => {
@@ -79,6 +64,5 @@ module.exports = {
     test_session_connection,
     require_login,
     require_access_level,
-    require_project_access_level,
     require_logout
 };

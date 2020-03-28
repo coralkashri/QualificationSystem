@@ -1,0 +1,50 @@
+/***************
+    Nav List
+***************/
+.table-of-contents {
+  &.fixed {
+    @media #{$medium-and-up} {
+      position: fixed;
+    }
+  }
+
+  li {
+    padding: 2px 0;
+    @media #{$small-and-down} {
+      float: left;
+      padding-right: 10px;
+    }
+  }
+  a {
+    display: inline-block;
+    font-weight: 300;
+    color: $nav-list-link-color;
+    height: 1.5rem;
+    line-height: 1.5rem;
+    letter-spacing: .4;
+    display: inline-block;
+    padding-left: 16px;
+
+    &:hover {
+      color: lighten($nav-list-link-color, 20%);
+      border-left: 1px solid $primary-color;
+      padding-left: 15px;
+    }
+    &.active {
+      font-weight: 500;
+      border-left: 2px solid $primary-color;
+      padding-left: 14px;
+    }
+
+    @media #{$small-and-down} {
+      padding-left: 5px;
+
+      &:hover {
+        padding-left: 4px;
+      }
+      &.active {
+        padding-left: 3px;
+      }
+    }
+  }
+}

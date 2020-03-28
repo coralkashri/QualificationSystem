@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="global_app" ng-cloak>
+
+<head>
+    <% include ../partials/global/basic_head.ejs %>
+    <script type="text/javascript" src="/js/pages/login.js"></script>
+    <title>Versions Track - Login</title>
+</head>
+
+<body class="rtl" ng-controller="body_controller">
+    <%- include('../partials/global/nav', {page: 'login', page_view_name: 'Login'});%>
+
+    <div id="page_content">
+        <br><br><br><br>
+        <div class="row">
+            <div class="s12 center">
+                <!--<img src="../images/icare-logo.png" style="width: 75%; max-width: min-content;">-->
+            </div>
+        </div>
+        <!--<div class="row" style="padding-top: 20px;">
+            <div class="s12 center">
+                <h3 class="blue-text text-darken-4">Login</h3>
+            </div>
+        </div>-->
+        <div class="row" style="margin: 0 auto; display: flex;">
+            <form method="post" ng-submit="login()" class="col s12 m4" style="margin: 0 auto;">
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input ng-model="username_model" type="text" id="username" ng-init="username_model=''" class="validate">
+                        <label for="username">username</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="input-field col s12">
+                        <input name="pwd" ng-model="password_model" id="last_name" ng-init="password_model=''" type="password" class="validate">
+                        <label for="last_name">password</label>
+                    </div>
+                </div>
+                <div class="row left-align" style="padding-left: .75rem;">
+                    <button ng-class="{'disabled': !username_model.length || !password_model.length}" class="btn waves-effect waves-light" style="background-color: #00205a" type="submit" name="action">Login
+                        <i class="material-icons right">fiber_manual_record</i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <% include ../partials/global/footer.html %>
+</body>
+</html>

@@ -1,12 +1,14 @@
 {
   "plans": [
     {
+      "_id": 100,
       "name": "Developer",
       "route": [1000],
       "description": "plan_description",
       "estimated_days": 60
     }
   ],
+
   "tasks": [
     {
       "_id": 1000,
@@ -48,6 +50,7 @@
       "answer": "" // TODO
     }
   ],
+
   "topics": [
     {
       "_id": 2000,
@@ -57,6 +60,41 @@
       "_id": 2001,
       "name": "topic_name_1",
       "description": "topic_description_1"
+    }
+  ],
+
+  "users": [
+    {
+      "_id": 5000,
+      "username": "user1",
+      "password": "hashed_pass",
+      // 3 -> System Admin    -> Create moderators users.
+      // 2 -> Moderator       -> Create/Modify/Remove tasks & plans & members
+      // 1 -> Member          -> Submit tasks.
+      // 0 -> Banned          -> No access at all.
+      "role": 1, // enum [0, 1, 2, 3]
+      "register_date": 12458781254,
+      "plan": {
+        "id": 100,
+        "completed_tasks": [
+          {
+            "id": 2000,
+            "answer": "Yea man!",
+            "reviewer": 5001
+          }
+        ],
+        "tasks_for_review": [
+          {
+            "id": 2002,
+            "answer": ""
+          }
+        ],
+        "current_task": {
+          "id": 2005,
+          "status": "In Progress", // enum ["In Progress", "Waiting", "In Review", "Completed"] --> If completed, this is the last task in the plan
+          "answer": ""
+        }
+      }
     }
   ]
 }
