@@ -13,5 +13,8 @@ exports.min_access_required = {
     delete_topic: 2,
     create_tasks: 2,
     delete_tasks: 2,
-    modify_tasks: 2
+    modify_tasks: 2,
+    create_plans: 2,
+    modify_plans: 2,
+    delete_plans: 2
 };

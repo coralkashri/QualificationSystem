@@ -125,55 +125,57 @@ let init_users_schema = _ => {
             type: Date,
             default: Date.now
         },
-        plan: {
-            id: {
-                type: Number,
-                required: true
-            },
-            completed_tasks: [
-                {
-                    id: {
-                        type: Number,
-                        required: true
-                    },
-                    answer: { // TODO
-                        type: String,
-                        required: true
-                    },
-                    reviewer: {
-                        type: String,
-                        required: true
-                    }
-                }
-            ],
-            tasks_for_review: [
-                {
-                    id: {
-                        type: Number,
-                        required: true
-                    },
-                    answer: { // TODO
-                        type: String,
-                        required: true
-                    }
-                }
-            ],
-            current_task: {
+        plans: [
+            { // plan
                 id: {
                     type: Number,
                     required: true
                 },
-                status: {
-                    type: String,
-                    enum: ["In Progress", "Waiting", "In Review", "Completed"], // If completed, this is the last task in the plan
-                    default: "In Progress"
-                },
-                answer: { // TODO
-                    type: String,
-                    default: ""
+                completed_tasks: [
+                    {
+                        id: {
+                            type: Number,
+                            required: true
+                        },
+                        answer: { // TODO
+                            type: String,
+                            required: true
+                        },
+                        reviewer: {
+                            type: String,
+                            required: true
+                        }
+                    }
+                ],
+                tasks_for_review: [
+                    {
+                        id: {
+                            type: Number,
+                            required: true
+                        },
+                        answer: { // TODO
+                            type: String,
+                            required: true
+                        }
+                    }
+                ],
+                current_task: {
+                    id: {
+                        type: Number,
+                        required: true
+                    },
+                    status: {
+                        type: String,
+                        enum: ["In Progress", "Waiting", "In Review", "Completed"], // If completed, this is the last task in the plan
+                        default: "In Progress"
+                    },
+                    answer: { // TODO
+                        type: String,
+                        default: ""
+                    }
                 }
             }
-        }
+        ]
     });
 
     // Create versions model
@@ -190,7 +192,7 @@ let init_users_schema = _ => {
                 password: password,
                 role: role
             });
-            new_user.save((err) => {});
+            new_user.save((err) => { if (err) throw new Error(err); });
         }
     });
 };

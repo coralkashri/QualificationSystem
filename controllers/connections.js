@@ -9,12 +9,11 @@ exports.login = async (req, res, next) => {
         let user = await users_model.get(req, res, next); // by username & password
         if (user.length !== 0) {
             user = user[0];
-            if (hash(req.query.password) === user.password) { // Single hash comparison
-                // sets a cookie with the user's info
-                user.password = hash(user.password);
-                req.session.user = user;
-                return responses_gen.generate_response(res, 200, user, "Successful login");
-            }
+            // user.password (deleted) == hash(req.query.password)
+            // sets a cookie with the user's info
+            user.password = hash(hash(req.query.password)); // Single hash --> store in DB, Double hash --> Store in cookies.
+            req.session.user = user;
+            return responses_gen.generate_response(res, 200, user, "Successful login");
         }
         throw new Error("Credentials don't much an existing user.");
     } catch (e) {

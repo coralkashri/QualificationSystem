@@ -13,6 +13,8 @@ let app = express()
 
     .use(express.static(path.join(__dirname, 'public')))
 
+    .use('/scripts', express.static(__dirname + '/node_modules/mark.js/dist/'))
+
     .use(session({
         cookieName: 'session',
         secret: 'asn916ikl;4j32fsda8a4asdfet1d42hjk3@#$#^^%wefrwefwoj5qjhlw112346h!@#$^io5u1ikl5$cbv6effjf\'eer346\'5yttr%^&Y4@asdf##$@34234',

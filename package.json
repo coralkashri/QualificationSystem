@@ -16,8 +16,11 @@
     "mongoose-timestamp": "^0.6.0",
     "client-sessions": "^0.8.0",
     "assert": "^2.0.0",
-    "ejs": "^3.0.1",
+    "ejs": "^2.7.1",
     "moment": "^2.24.0",
     "password-hasher": "^1.0.1"
+  },
+  "devDependencies": {
+    "mark.js": "^8.11.1"
   }
 }
