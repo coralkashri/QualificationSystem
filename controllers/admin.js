@@ -82,7 +82,7 @@ exports.view_topics_management_page = async (req, res, next) => {
     try {
         let cat_name = "topics-management";
         let route_param_name = "topic_name";
-        //let render_params = await standard_management_params_to_render(req, cat_name, route_param_name, topics_model.is_topic_exists);
+        let render_params = await standard_management_params_to_render(req, cat_name, route_param_name, topics_model.is_topic_exists);
         res.render("pages/admin_panel", render_params);
     } catch (e) {
         return responses_gen.generate_response(res, 400, null, e.message);
