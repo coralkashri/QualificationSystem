@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="global_app" ng-cloak>
+
+<head>
+    <%include ../partials/global/basic_head.ejs%>
+    <script type="text/javascript" src="/js/services/users.js"></script>
+    <script type="text/javascript" src="/js/pages/admin_panel.js"></script>
+    <title>Qualification System - Admin Panel</title>
+</head>
+<body class="rtl" ng-controller="body_controller" data-ng-init="init()">
+<!--<video style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;" src="/resources/images/background.mp4" autoplay="autoplay" loop="loop"></video>-->
+
+<%- include('../partials/global/nav', {page: 'admin_panel', page_view_name: 'Admin Panel'});%>
+
+<div id="page_content">
+    <br><br><br><br>
+    <div style="padding: 0 0.75rem;" class="row">
+        <% let menu_links = [
+            {
+                link: '/view/admin-panel/users-management',
+                name: 'Users Management'
+            }, {
+                link: '/view/admin-panel/plans-management',
+                name: 'Plans Management'
+            }, {
+                link: '/view/admin-panel/topics-management',
+                name: 'Topics Management'
+            }, {
+                link: '/view/admin-panel/tasks-management',
+                name: 'Tasks Management'
+            }
+        ]%>
+        <%- include('../partials/global/menu', {menu_links: menu_links, current_page: category_name}) %>
+        <div class="col s12 m9 l10">
+            <%-include("../partials/admin_panel/" + category_name.replace('-', '_'))%>
+        </div>
+    </div>
+</div>
+
+<%include ../partials/global/footer.html%>
+
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="global_app" ng-cloak>
+
+<head>
+    <% include ../partials/global/basic_head.ejs %>
+    <script type="text/javascript" src="/js/pages/plans.js"></script>
+    <% if (typeof plan_name != "undefined") { %>
+        <title><%=plan_name%> Qualification Plan</title>
+    <% } else { %>
+        <title>Qualification System - Plans</title>
+    <% } %>
+</head>
+
+<body class="rtl" ng-controller="body_controller">
+<% if (typeof plan_name != "undefined") { %>
+    <%- include('../partials/global/nav', {page: 'view_plan', page_view_name: plan_name});%>
+<% } else { %>
+    <%- include('../partials/global/nav', {page: 'plans', page_view_name: 'Plans'});%>
+<% } %>
+<div id="page_content">
+    <br><br><br><br>
+    <div class="row">
+        <div class="s12 center">
+        </div>
+    </div>
+    <div class="row" style="margin: 0 auto; display: flex;">
+        <% if (typeof plan_name != "undefined") { %>
+            <!--View selected plan-->
+        <% } else { %>
+            <!--View all plans-->
+        <% } %>
+    </div>
+</div>
+
+<% include ../partials/global/footer.html %>
+</body>
+</html>

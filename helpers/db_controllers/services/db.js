@@ -38,7 +38,8 @@ let init_topics_schema = async _ => {
         description: {
             type: String,
             required: true
-        }
+        },
+        dependencies_topics: [String] // Topics ids that should be done before this topic
     });
 
     // Create systems model
@@ -55,6 +56,10 @@ let init_tasks_schema = async _ => {
         },
         topic_id: {
             type: String,
+            required: true
+        },
+        inner_topic_order: {
+            type: Number,
             required: true
         },
         details: {
@@ -141,7 +146,7 @@ let init_users_schema = _ => {
                             type: String,
                             required: true
                         },
-                        reviewer: {
+                        reviewer: { // Reviewer user id
                             type: String,
                             required: true
                         }

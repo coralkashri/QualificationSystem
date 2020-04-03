@@ -6,11 +6,11 @@ let database = require('../helpers/db_controllers/services/db').getDB();
 let requests_handler = require('../helpers/requests_handler');
 const access_limitations = require('../helpers/configurations/access_limitations');
 
-// req["params"]["username"]
+// req["query"]["username"]
 // Return: true if exists, else: false
-let is_user_exists = async (req, res, next) => {
+let is_username_exists = async (req, res, next) => {
     let users_db_model = database.users_model();
-    let username = requests_handler.require_param(req, "route", "username");
+    let username = requests_handler.require_param(req, "get", "username");
     return (await users_db_model.find({username: username}).exec()).length !== 0;
 };
 
@@ -82,7 +82,7 @@ exports.add = async (req, res, next) => {
     let password = requests_handler.require_param(req, "post", "password");
     let role = requests_handler.optional_param(req, "post", "role");
 
-    let user_exists = await is_user_exists({ params: { username: username } });
+    let user_exists = await is_username_exists({ query: { username: username } });
 
     assert.ok(!user_exists, "User already exists"); // If exists, throw error
 
@@ -128,7 +128,7 @@ exports.modify = async (req, res, next) => {
         delete update.$set.role;
     }
 
-    let user_exists = await is_user_exists({ params: filter });
+    let user_exists = await is_username_exists({ query: filter });
     assert.ok(user_exists, "User not found"); // If not exists, throw error
 
     let last_admin_validation = await last_admin_user_validation(username, "Modify", new_role);
@@ -143,7 +143,7 @@ exports.remove = async (req, res, next) => {
     let users_db_model = database.users_model();
     let username = requests_handler.require_param(req, "route", "username");
 
-    let user_exists = await is_user_exists({ params: { username: username} });
+    let user_exists = await is_username_exists({ query: { username: username} });
 
     assert.ok(user_exists, "User not found"); // If not exists, throw error
 
@@ -153,4 +153,4 @@ exports.remove = async (req, res, next) => {
     return users_db_model.remove({username: username}).exec();
 };
 
-exports.validate_username = is_user_exists;
+exports.is_username_exists = is_username_exists;

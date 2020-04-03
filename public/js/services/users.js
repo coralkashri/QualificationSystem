@@ -2,7 +2,7 @@ angular.module("adminUsersM", [])
 
     .service("adminUsers", function() {
         let _$scope, _$http, _preloader;
-        let role_names = ["Banned", "Guest", "User", "Manger", "Admin"];
+        let role_names = ["Banned", "User", "Manger", "Admin"];
 
         this.init = ($scope, $http, preloader) => {
             _$scope = $scope;

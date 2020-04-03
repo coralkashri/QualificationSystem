@@ -29,5 +29,5 @@ const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM'])
                 response = response.data;
                 alertify.error(response.message);
             });
-        }
+        };
     });

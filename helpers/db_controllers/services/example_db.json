@@ -14,6 +14,7 @@
       "_id": 1000,
       "name": "task_name",
       "topic": 2000,
+      "inner_topic_order": 1, // Place in topic
       "details": "Task details. What does the learner have to learn/do? Exit using ${1}.", // ${1} will be replaced according to plan_exceptions
       "search_keywords": ["keyword1", "keyword2", "keyword3"],
       "check_point": "NONE", // enum: ["NONE", "SOFT", "STRONG"]
@@ -55,11 +56,23 @@
     {
       "_id": 2000,
       "name": "topic_name",
-      "description": "topic_description"
+      "description": "topic_description",
+      "dependencies_topics": []
     }, {
       "_id": 2001,
       "name": "topic_name_1",
-      "description": "topic_description_1"
+      "description": "topic_description_1",
+      "dependencies_topics": []
+    }, {
+      "_id": 2002,
+      "name": "c++",
+      "description": "topic_description_1",
+      "dependencies_topics": [2003]
+    }, {
+      "_id": 2003,
+      "name": "git",
+      "description": "topic_description_1",
+      "dependencies_topics": []
     }
   ],
 
@@ -72,29 +85,33 @@
       // 2 -> Moderator       -> Create/Modify/Remove tasks & plans & members
       // 1 -> Member          -> Submit tasks.
       // 0 -> Banned          -> No access at all.
-      "role": 1, // enum [0, 1, 2, 3]
+      "role": 1,
+      // enum [0, 1, 2, 3]
       "register_date": 12458781254,
-      "plan": {
-        "id": 100,
-        "completed_tasks": [
-          {
-            "id": 2000,
-            "answer": "Yea man!",
-            "reviewer": 5001
-          }
-        ],
-        "tasks_for_review": [
-          {
-            "id": 2002,
+      "plans": [
+        { // 1st plan
+          "id": 100,
+          "completed_tasks": [
+            {
+              "id": 2000,
+              "answer": "Yea man!",
+              "reviewer": 5001
+            }
+          ],
+          "tasks_for_review": [
+            {
+              "id": 2002,
+              "answer": ""
+            }
+          ],
+          "current_task": {
+            "id": 2005,
+            "status": "In Progress",
+            // enum ["In Progress", "Waiting", "In Review", "Completed"] --> If completed, this is the last task in the plan
             "answer": ""
           }
-        ],
-        "current_task": {
-          "id": 2005,
-          "status": "In Progress", // enum ["In Progress", "Waiting", "In Review", "Completed"] --> If completed, this is the last task in the plan
-          "answer": ""
         }
-      }
+      ]
     }
   ]
 }
