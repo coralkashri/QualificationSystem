@@ -79,10 +79,10 @@ exports.get = async (req, res, next) => {
     // Prepare query
     let query;
     if (target_plan) {
-        let req = {query: {}};
-        req.query.username = req.session.user.username;
-        req.query.plan_name = target_plan;
-        assert.ok(is_user_registered_to_plan(req, {}, {}), "You have no access to this plan.");
+        let validation_data = {query: {}};
+        validation_data.query.username = req.session.user.username;
+        validation_data.query.plan_name = target_plan;
+        assert.ok(is_user_registered_to_plan(validation_data, {}, {}), "You have no access to this plan.");
         query = {name: target_plan};
     } else {
         query = {};
@@ -97,25 +97,30 @@ exports.create = async (req, res, next) => {
     let plans_db_model = database.plans_model();
 
     // Get main param
-    let target_plan = requests_handler.optional_param(req, "route","plan_name");
+    let target_plan = requests_handler.require_param(req, "route","plan_name");
 
     // Validation
     let plan_exists = await is_plan_exists({ query: { plan_name: target_plan } });
     assert.equal(plan_exists, false, "Plan already exists"); // if exists, throw error
 
     // Get params
-    let plan_description = requests_handler.optional_param(req, "post", "description");
-    let plan_estimated_days = requests_handler.optional_param(req, "post", "estimated_days");
+    let plan_description = requests_handler.require_param(req, "post", "description");
+    let plan_estimated_days = requests_handler.require_param(req, "post", "estimated_days");
     let plan_route = requests_handler.optional_param(req, "post", "tasks_route");
+    let plan_active_status = requests_handler.optional_param(req, "post", "active_status");
+
+    // Arrange data
+    let data = {
+        name: target_plan,
+        description: plan_description,
+        estimated_days: plan_estimated_days
+    };
+    if (typeof plan_route != "undefined")           data.roue = plan_route;
+    if (typeof plan_active_status != "undefined")   data.is_active = plan_active_status;
 
     // Perform action
     let new_plan;
-    new_plan = new plans_db_model({
-        name: target_plan,
-        description: plan_description,
-        estimated_days: plan_estimated_days,
-        route: plan_route
-    });
+    new_plan = new plans_db_model(data);
     new_plan = new_plan.save();
 
     return new_plan;
@@ -126,24 +131,27 @@ exports.modify = async (req, res, next) => {
     let plans_db_model = database.plans_model();
 
     // Get main param
-    let target_plan = requests_handler.optional_param(req, "route","plan_name");
+    let target_plan = requests_handler.require_param(req, "route","plan_name");
 
     // Get params
     let new_plan_name = requests_handler.optional_param(req, "post", "new_plan_name");
     let new_plan_description = requests_handler.optional_param(req, "post", "new_description");
     let new_plan_estimated_days = requests_handler.optional_param(req, "post", "new_estimated_days");
     let new_plan_route = requests_handler.optional_param(req, "post", "new_tasks_route");
+    let new_active_status = requests_handler.optional_param(req, "post", "active_status");
+
+    // Arrange new data
+    let data = {};
+    if (typeof new_plan_name != "undefined")            data.name = new_plan_name;
+    if (typeof new_plan_description != "undefined")     data.description = new_plan_description;
+    if (typeof new_plan_estimated_days != "undefined")  data.estimated_days = new_plan_estimated_days;
+    if (typeof new_plan_route != "undefined")           data.roue = new_plan_route;
+    if (typeof new_active_status != "undefined")        data.is_active = new_active_status;
 
     // Prepare query
     let filter = {name: target_plan};
     let update = {
-        $set:
-            {
-                name: new_plan_name,
-                description: new_plan_description,
-                estimated_days: new_plan_estimated_days,
-                route: new_plan_route
-            }
+        $set: data
     };
 
     // Perform action
@@ -162,7 +170,7 @@ exports.remove = async (req, res, next) => {
     let plans_db_model = database.plans_model();
 
     // Get params
-    let target_plan = requests_handler.optional_param(req, "route","plan_name");
+    let target_plan = requests_handler.require_param(req, "route","plan_name");
 
     // Validation
     assert.ok(is_plan_exists({query: {plan_name: target_plan}}, {}, {}), "Plan not found.");

@@ -70,23 +70,31 @@ exports.create = async (req, res, next) => {
     let topics_db_model = database.topics_model();
 
     // Get main param
-    let target_topic = requests_handler.optional_param(req, "route","topic_name");
+    let target_topic = requests_handler.require_param(req, "route","topic_name");
 
     // Validation
     let topic_exists = await is_topic_exists({ query: { topic_name: target_topic } });
     assert.equal(topic_exists, false, "Topic already exists"); // if exists, throw error
 
     // Get params
-    let topic_description = requests_handler.optional_param(req, "post", "description");
+    let topic_description = requests_handler.require_param(req, "post", "description");
     let topic_dependencies = requests_handler.optional_param(req, "post", "dependencies");
+    let topic_active_status = requests_handler.optional_param(req, "post", "active_status");
+
+    // Arrange data
+    let data = {
+        name: target_topic,
+        description: topic_description
+    };
+    if (typeof topic_dependencies != "undefined") {
+        topic_dependencies = topic_dependencies && topic_dependencies.split(',');
+        data.dependencies_topics = topic_dependencies || [];
+    }
+    if (typeof topic_active_status != "undefined")  data.is_active = topic_active_status;
 
     // Perform action
     let new_topic;
-    new_topic = new topics_db_model({
-        name: target_topic,
-        description: topic_description,
-        dependencies_topics: topic_dependencies
-    });
+    new_topic = new topics_db_model(data);
     new_topic = new_topic.save();
 
     return new_topic;
@@ -103,16 +111,23 @@ exports.modify = async (req, res, next) => {
     let new_topic_name = requests_handler.optional_param(req, "post", "new_topic_name");
     let new_topic_description = requests_handler.optional_param(req, "post", "new_topic_description");
     let new_topic_dependencies = requests_handler.optional_param(req, "post", "new_topic_dependencies");
+    let new_topic_active_status = requests_handler.optional_param(req, "post", "new_topic_active_status");
+
+
+    // Arrange new data
+    let data = {};
+    if (typeof new_topic_name != "undefined")           data.name = new_topic_name;
+    if (typeof new_topic_description != "undefined")    data.description = new_topic_description;
+    if (typeof new_topic_dependencies != "undefined") {
+        new_topic_dependencies = new_topic_dependencies && new_topic_dependencies.split(',');
+        data.dependencies_topics = new_topic_dependencies || [];
+    }
+    if (typeof new_topic_active_status != "undefined")  data.is_active = new_topic_active_status;
 
     // Prepare query
     let filter = {name: target_topic};
     let update = {
-        $set:
-            {
-                name: new_topic_name,
-                description: new_topic_description,
-                dependencies_topics: new_topic_dependencies
-            }
+        $set: data
     };
 
     // Perform action
@@ -138,6 +153,8 @@ exports.remove = async (req, res, next) => {
 
     // Perform action
     return topics_db_model.remove({name: target_topic}).exec();
+
+    // TODO delete as well all topic related tasks
 };
 
 exports.get_topic_id = get_topic_id;

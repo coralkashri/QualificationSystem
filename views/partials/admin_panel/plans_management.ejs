@@ -1,112 +1,138 @@
 <% if (typeof action === 'undefined') { %>
     <!--Show all users list-->
-    <div class="row" ng-init="get_all_users(); current_username = '<%=username%>';">
-        <div class="col s6 m3"><b>Username</b></div>
-        <div class="col s4 m1"><b>Role</b></div>
-        <div class="col s2 m1"><b>Actions</b></div>
-    </div>
-    <div class="row" ng-repeat="user_data in users_list | orderBy: ['-role']">
-        <div ng-class="{'selected-row': user_data.username === current_username}" class="col s6 m3">
-            <b ng-if="user_data.username === current_username">
-                <a href="/view/admin-panel/users-management/u{{user_data.username}}">{{user_data.username}}</a>
-            </b>
-            <span ng-if="user_data.username !== current_username">
-                <a href="/view/admin-panel/users-management/u{{user_data.username}}">{{user_data.username}}</a>
-            </span>
-        </div>
-        <div ng-class="{'selected-row': user_data.username === current_username}" class="col s4 m1">
-            <b ng-if="user_data.username === current_username">
-                {{get_role_name(user_data.role)}}
-            </b>
-            <span ng-if="user_data.username !== current_username">
-                {{get_role_name(user_data.role)}}
-            </span>
-        </div>
-        <div ng-if="user_data.username !== current_username" class="col s2 m1">
-            <button class="red btn-small btn-floating waves-effect waves-light" ng-click="delete_user(user_data.username)">
-                <i class="material-icons">delete</i>
-            </button>
-        </div>
-    </div>
-    <div class="row" ng-init="get_all_users()">
+    <span ng-init="get_all_plans();"></span>
+    <ul class="collapsible popout">
+        <li ng-repeat="plan_data in plans_list | orderBy: ['-is_active', 'name']">
+            <div class="collapsible-header" ng-class="{grey: !plan_data.is_active}">{{plan_data.name}}</div>
+
+            <div class="collapsible-body">
+                <div ng-if="!plan_data.is_active">
+                    <div class="valign-wrapper flash flash-warn" style="width: 100%;">
+                        <i class="material-icons" style="padding-right: 5px;">warning</i>
+                        This plan is currently inactive.
+                    </div>
+                </div>
+                <div>{{plan_data.description}}</div>
+            </div>
+
+            <div class="collapsible-footer">
+                <a class="btn-small waves-effect waves-light"
+                   href="/view/admin-panel/plans-management/p{{plan_data.name}}"
+                   title="Management">
+                    <i class="material-icons">settings</i>
+                </a>
+
+                <a ng-if="plan_data.is_active"
+                   class="btn-small waves-effect waves-light"
+                   ng-click="archive_plan(plan_data.name);"
+                   title="Archive">
+                    <i class="material-icons">archive</i>
+                </a>
+
+                <a ng-if="!plan_data.is_active"
+                   class="btn-small waves-effect waves-light"
+                   ng-click="reactivate_plan(plan_data.name);"
+                   title="Reactivate">
+                    <i class="material-icons">unarchive</i>
+                </a>
+
+                <a class="btn-small waves-effect waves-light"
+                   ng-click="delete_plan(plan_data.name);"
+                   title="Delete">
+                    <i class="material-icons">delete</i>
+                </a>
+            </div>
+        </li>
+    </ul>
+    <div class="row">
         <div class="col s12 m4">
-            <a class="btn-small btn-floating waves-effect waves-light" href="/view/admin-panel/users-management/new-user">
+            <a class="btn-small btn-floating waves-effect waves-light" href="/view/admin-panel/plans-management/new-plan">
                 <i class="material-icons">add</i>
             </a>
         </div>
     </div>
-<% } else if (action == "view" && typeof username_for_details !== "undefined") { %>
+<% } else if (action == "view" && typeof plan_name_for_details !== "undefined") { %>
     <!--Show specific user details-->
-    <div ng-init="get_user_details('<%= username_for_details %>')">
-        <h4>{{user_data.username}}</h4><br>
-        <form ng-submit="modify_user(user_data.username);">
+    <div ng-init="get_plan_details('<%= plan_name_for_details %>');">
+        <h4>{{original_plan_name}}</h4><br>
+        <form ng-submit="modify_plan(original_plan_name, plan_data);">
             <div class="row">
                 <div class="input-field col s12">
-                    <input id="username" type="text" class="validate">
-                    <label for="username">Username</label>
+                    <input id="plan_name" ng-model="plan_data.name" type="text" class="validate">
+                    <label for="plan_name">Plan Name</label>
                 </div>
             </div>
+
+            <label>
+                <input ng-model="plan_data.is_active" type="checkbox" />
+                <span>Active</span>
+            </label><br><br>
+
             <div class="row">
                 <div class="input-field col s12">
-                    <input id="password" type="password" class="validate">
-                    <label for="password">Password</label>
+                    <textarea id="description" ng-model="plan_data.description" class="validate materialize-textarea"></textarea>
+                    <label for="description">Description</label>
                 </div>
             </div>
+
             <div class="row">
                 <div class="input-field col s12">
-                    <select id="user_role">
-                        <option value="3">Admin</option>
-                        <option value="2">Manger</option>
-                        <option value="1">User</option>
-                        <option value="0">Banned</option>
-                    </select>
-                    <label for="user_role">Role</label>
+                    <input id="estimated_days" ng-model="plan_data.estimated_days" type="number" class="validate">
+                    <label for="estimated_days">Estimated Days</label>
                 </div>
             </div>
+
+            <!--TODO rout editing-->
+
             <div class="row">
                 <div class="col s6">
                     <button type="submit" class="col s12 waves-effect waves-green btn-flat">Update</button>
                 </div>
                 <div class="col s6">
-                    <button type="reset" ng-click="back_to_users_management();" class="col s12 waves-effect waves-red btn-flat">Cancel</button>
+                    <button type="reset" ng-click="back_to_parent_category();" class="col s12 waves-effect waves-red btn-flat">Cancel</button>
                 </div>
             </div>
         </form>
     </div>
 <% } else if (action == "create") { %>
-    <!--Create new user-->
-    <h4>Create New User</h4><br>
-    <div class="row">
-        <form class="col s12" ng-submit="create_user();">
+    <!--Create new plan-->
+    <h4>Create New Plan</h4><br>
+    <div class="row" ng-init="plan_data = {};">
+        <form class="col s12" ng-submit="create_plan(plan_data);">
             <div class="row">
                 <div class="input-field col s12">
-                    <input id="username" type="text" class="validate" required="required">
-                    <label for="username">Username</label>
+                    <input id="plan_name" ng-model="plan_data.name" type="text" class="validate">
+                    <label for="plan_name">Plan Name</label>
                 </div>
             </div>
+
+            <label>
+                <input ng-model="plan_data.is_active" ng-init="plan_data.is_active = true;" type="checkbox" />
+                <span>Active</span>
+            </label><br><br>
+
             <div class="row">
                 <div class="input-field col s12">
-                    <input id="password" type="password" class="validate" required="required">
-                    <label for="password">Password</label>
+                    <textarea id="description" ng-model="plan_data.description" class="validate materialize-textarea"></textarea>
+                    <label for="description">Description</label>
                 </div>
             </div>
+
             <div class="row">
                 <div class="input-field col s12">
-                    <select id="user_role">
-                        <option value="3">Admin</option>
-                        <option value="2">Manger</option>
-                        <option selected value="1">User</option>
-                        <option value="0">Banned</option>
-                    </select>
-                    <label for="user_role">Role</label>
+                    <input id="estimated_days" ng-model="plan_data.estimated_days" type="number" class="validate">
+                    <label for="estimated_days">Estimated Days</label>
                 </div>
             </div>
+
+            <!--TODO rout creating-->
+
             <div class="row">
                 <div class="col s6">
-                    <button type="submit" class="col s12 waves-effect waves-green btn-flat">Create user</button>
+                    <button type="submit" class="col s12 waves-effect waves-green btn-flat">Create</button>
                 </div>
                 <div class="col s6">
-                    <button type="reset" ng-click="back_to_users_management();" class="col s12 waves-effect waves-red btn-flat">Cancel</button>
+                    <button type="reset" ng-click="back_to_parent_category();" class="col s12 waves-effect waves-red btn-flat">Cancel</button>
                 </div>
             </div>
         </form>

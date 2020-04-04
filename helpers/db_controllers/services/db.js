@@ -20,6 +20,10 @@ let init_plans_schema = async _ => {
         estimated_days: {
             type: Number,
             required: true
+        },
+        is_active: {
+            type: Boolean,
+            default: true
         }
     });
 
@@ -38,6 +42,10 @@ let init_topics_schema = async _ => {
         description: {
             type: String,
             required: true
+        },
+        is_active: {
+            type: Boolean,
+            default: true
         },
         dependencies_topics: [String] // Topics ids that should be done before this topic
     });

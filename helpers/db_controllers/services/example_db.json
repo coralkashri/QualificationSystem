@@ -5,7 +5,8 @@
       "name": "Developer",
       "route": [1000],
       "description": "plan_description",
-      "estimated_days": 60
+      "estimated_days": 60,
+      "is_active": true
     }
   ],
 
@@ -57,21 +58,25 @@
       "_id": 2000,
       "name": "topic_name",
       "description": "topic_description",
+      "is_active": false,
       "dependencies_topics": []
     }, {
       "_id": 2001,
       "name": "topic_name_1",
       "description": "topic_description_1",
+      "is_active": true,
       "dependencies_topics": []
     }, {
       "_id": 2002,
       "name": "c++",
       "description": "topic_description_1",
+      "is_active": true,
       "dependencies_topics": [2003]
     }, {
       "_id": 2003,
       "name": "git",
       "description": "topic_description_1",
+      "is_active": true,
       "dependencies_topics": []
     }
   ],

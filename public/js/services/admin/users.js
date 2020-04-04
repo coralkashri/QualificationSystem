@@ -1,6 +1,6 @@
 angular.module("adminUsersM", [])
 
-    .service("adminUsers", function() {
+    .service("admin_users_s", function() {
         let _$scope, _$http, _preloader;
         let role_names = ["Banned", "User", "Manger", "Admin"];
 
@@ -50,7 +50,7 @@ angular.module("adminUsersM", [])
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'}
                 }).then((response) => {
                     response = response.data;
-                    _$scope.back_to_users_management();
+                    _$scope.back_to_parent_category();
                     alertify.success(response.message);
                 }, (response) => {
                     response = response.data;
@@ -72,7 +72,7 @@ angular.module("adminUsersM", [])
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'}
                 }).then((response) => {
                     response = response.data;
-                    _$scope.back_to_users_management();
+                    _$scope.back_to_parent_category();
                     alertify.success(response.message);
                 }, (response) => {
                     response = response.data;
@@ -94,10 +94,6 @@ angular.module("adminUsersM", [])
                     response = response.data;
                     alertify.error(response.message);
                 });
-            };
-
-            _$scope.back_to_users_management = () => {
-                window.location.assign(".");
             };
         };
 
