@@ -4,6 +4,7 @@ const users_controller = require("../../controllers/users");
 const con_validator = require('../../middlewares/validate_connection');
 const access_limitations = require('../../helpers/configurations/access_limitations');
 let requests_handler = require('../../helpers/requests_handler');
+const general_middleware_validators = require('../../middlewares/general_validators');
 
 // GET routes
 
@@ -18,15 +19,33 @@ router.get("/all", (req, res, next) => {
 }, con_validator.require_access_level, users_controller.get_users);
 
 router.get("/u:username", (req, res, next) => {
-    req.required_level = access_limitations.min_access_required.view_users_details;
+    req.required_level = access_limitations.min_access_required.view_profile;
     req.action_on_reject = _ => {
         res.redirect('/403');
     };
     next();
 }, con_validator.require_access_level, users_controller.get_user);
 
+router.get("/u:username/available-plans", (req, res, next) => {
+    req.required_level = access_limitations.min_access_required.view_profile;
+    req.action_on_reject = _ => {
+        res.redirect('/403');
+    };
+    next();
+}, con_validator.require_access_level, users_controller.get_available_plans);
+
+router.get("/u:username/registered-plans", (req, res, next) => {
+    req.required_level = access_limitations.min_access_required.view_profile;
+    req.action_on_reject = _ => {
+        res.redirect('/403');
+    };
+    next();
+}, con_validator.require_access_level, users_controller.get_registered_plans);
+
 
 // POST routes
+
+router.post('/u:username/register/:plan_name', users_controller.register_to_plan);
 
 router.post("/create", (req, res, next) => {
     req.required_level = access_limitations.min_access_required.create_new_user_with_specific_role;

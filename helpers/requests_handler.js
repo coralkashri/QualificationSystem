@@ -34,3 +34,20 @@ exports.optional_param = (req, param_type, param_name) => {
     }
     return req[param_type][param_name];
 };
+
+let validate_basic_input = (input) => {
+    return typeof input != "undefined";
+};
+
+exports.validate_basic_input = validate_basic_input;
+
+exports.validate_and_set_basic_optional_input = (input, dst_obj, prop) => {
+    if (validate_basic_input(input)) dst_obj[prop] = input;
+};
+
+exports.validate_and_set_array_optional_input = (input, dst_obj, prop) => {
+    if (validate_basic_input(input)) {
+        input = input && input.split(',');
+        dst_obj[prop] = input || [];
+    }
+};

@@ -13,11 +13,15 @@ angular.module("plansM", [])
                 return 55; // TODO ajax
             };
 
-            _$scope.get_all_plans = () => {
+            _$scope.get_all_plans = (username) => {
+                let deferred = $.Deferred();
                 _preloader.start();
+
+                let url = username ? "/api/users/u" + username + "/available-plans" : "/api/plans";
+
                 _$http({
                     method: "GET",
-                    url: "/api/plans",
+                    url: url,
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'}
                 }).then((response) => {
                     response = response.data;
@@ -34,15 +38,18 @@ angular.module("plansM", [])
                         _$scope.plans_list = new_plans_list;
                         _preloader.stop();
                     }
+                    deferred.resolve("Update Success");
                 }, (response) => {
                     response = response.data;
                     alertify.error(response.message);
                     _preloader.stop();
+                    deferred.reject("Update Failed");
                 });
+                return deferred.promise();
             };
 
             _$scope.get_plan_details = (plan_name) => {
-                this.get_plan_details(plan_name, undefined);
+                this.get_plan_details(plan_name);
             }
         };
 

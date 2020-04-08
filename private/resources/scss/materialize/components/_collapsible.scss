@@ -36,6 +36,13 @@
   border-bottom: 1px solid $collapsible-border-color;
   box-sizing: border-box;
   padding: 2rem;
+
+  .collapsible-footer {
+    border-top: 1px solid $collapsible-border-color;
+    padding: 1rem;
+    margin-top: 1rem;
+    text-align: right;
+  }
 }
 
 // Sidenav collapsible styling

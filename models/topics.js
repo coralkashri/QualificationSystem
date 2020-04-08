@@ -9,7 +9,7 @@ const access_limitations = require('../helpers/configurations/access_limitations
 /**
  *
  * @param req
- * req["query"]["topic_name"] - Plan name
+ * req["query"]["topic_name"] - Topic name
  *
  * @returns true if exists, else false.
  */
@@ -61,6 +61,9 @@ exports.get = async (req, res, next) => {
         query = {};
     }
 
+    if (!req.session.user || req.session.user.role < access_limitations.min_access_required.view_archived_topics)
+        query.is_active = true;
+
     // Perform query
     return await topics_db_model.find(query).exec();
 };
@@ -74,23 +77,21 @@ exports.create = async (req, res, next) => {
 
     // Validation
     let topic_exists = await is_topic_exists({ query: { topic_name: target_topic } });
-    assert.equal(topic_exists, false, "Topic already exists"); // if exists, throw error
+    assert.equal(topic_exists, false, "Topic already exists"); // If exists, throw error
 
     // Get params
-    let topic_description = requests_handler.require_param(req, "post", "description");
-    let topic_dependencies = requests_handler.optional_param(req, "post", "dependencies");
-    let topic_active_status = requests_handler.optional_param(req, "post", "active_status");
+    let topic_description =     requests_handler.require_param(req, "post", "description");
+    let topic_dependencies =    requests_handler.optional_param(req, "post", "dependencies");
+    let topic_active_status =   requests_handler.optional_param(req, "post", "active_status");
 
     // Arrange data
     let data = {
         name: target_topic,
         description: topic_description
     };
-    if (typeof topic_dependencies != "undefined") {
-        topic_dependencies = topic_dependencies && topic_dependencies.split(',');
-        data.dependencies_topics = topic_dependencies || [];
-    }
-    if (typeof topic_active_status != "undefined")  data.is_active = topic_active_status;
+    requests_handler.validate_and_set_array_optional_input(topic_dependencies, data, "dependencies_topics");
+    if (req.session.user.role >= access_limitations.min_access_required.archive_topics)
+        requests_handler.validate_and_set_basic_optional_input(topic_active_status, data, "is_active");
 
     // Perform action
     let new_topic;
@@ -107,22 +108,23 @@ exports.modify = async (req, res, next) => {
     // Get main param
     let target_topic = requests_handler.optional_param(req, "route","topic_name");
 
-    // Get params
-    let new_topic_name = requests_handler.optional_param(req, "post", "new_topic_name");
-    let new_topic_description = requests_handler.optional_param(req, "post", "new_topic_description");
-    let new_topic_dependencies = requests_handler.optional_param(req, "post", "new_topic_dependencies");
-    let new_topic_active_status = requests_handler.optional_param(req, "post", "new_topic_active_status");
+    // Pre Validation
+    let topic_exists = await is_topic_exists({ query: { topic_name: target_topic } });
+    assert.ok(topic_exists, "Topic not found."); // If not exists, throw error
 
+    // Get params
+    let new_topic_name =            requests_handler.optional_param(req, "post", "new_topic_name");
+    let new_topic_description =     requests_handler.optional_param(req, "post", "new_topic_description");
+    let new_topic_dependencies =    requests_handler.optional_param(req, "post", "new_topic_dependencies");
+    let new_topic_active_status =   requests_handler.optional_param(req, "post", "new_topic_active_status");
 
     // Arrange new data
     let data = {};
-    if (typeof new_topic_name != "undefined")           data.name = new_topic_name;
-    if (typeof new_topic_description != "undefined")    data.description = new_topic_description;
-    if (typeof new_topic_dependencies != "undefined") {
-        new_topic_dependencies = new_topic_dependencies && new_topic_dependencies.split(',');
-        data.dependencies_topics = new_topic_dependencies || [];
-    }
-    if (typeof new_topic_active_status != "undefined")  data.is_active = new_topic_active_status;
+    requests_handler.validate_and_set_basic_optional_input(new_topic_name, data, "name");
+    requests_handler.validate_and_set_basic_optional_input(new_topic_description, data, "description");
+    requests_handler.validate_and_set_array_optional_input(new_topic_dependencies, data, "dependencies_topics");
+    if (req.session.user.role >= access_limitations.min_access_required.archive_topics)
+        requests_handler.validate_and_set_basic_optional_input(new_topic_active_status, data, "is_active");
 
     // Prepare query
     let filter = {name: target_topic};
@@ -136,7 +138,7 @@ exports.modify = async (req, res, next) => {
     }).exec();
 
     // Post Validation
-    assert.equal(new_topic.ok, true, "Target topic didn't found.");
+    assert.equal(new_topic.ok, true, "Target topic update failed.");
 
     return new_topic;
 };
@@ -149,7 +151,8 @@ exports.remove = async (req, res, next) => {
     let target_topic = requests_handler.optional_param(req, "route","topic_name");
 
     // Validation
-    assert.ok(is_topic_exists({query: {topic_name: target_topic}}, {}, {}), "Topic not found.");
+    let topic_exists = await is_topic_exists({ query: { topic_name: target_topic } });
+    assert.ok(topic_exists, "Topic not found."); // If not exists, throw error
 
     // Perform action
     return topics_db_model.remove({name: target_topic}).exec();

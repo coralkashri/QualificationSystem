@@ -13,7 +13,7 @@
   "tasks": [
     {
       "_id": 1000,
-      "name": "task_name",
+      "title": "Task Title",
       "topic": 2000,
       "inner_topic_order": 1, // Place in topic
       "details": "Task details. What does the learner have to learn/do? Exit using ${1}.", // ${1} will be replaced according to plan_exceptions
@@ -96,6 +96,7 @@
       "plans": [
         { // 1st plan
           "id": 100,
+          "register_date": 12458991254,
           "completed_tasks": [
             {
               "id": 2000,

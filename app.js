@@ -15,9 +15,11 @@ let app = express()
 
     .use('/scripts', express.static(__dirname + '/node_modules/mark.js/dist/'))
 
+    .use('/uploads', express.static(__dirname + '/helpers/db_controllers/uploads'))
+
     .use(session({
         cookieName: 'session',
-        secret: 'asn916ikl;4j32fsda8a4asdfet1d42hjk3@#$#^^%wefrwefwoj5qjhlw112346h!@#$^io5u1ikl5$cbv6effjf\'eer346\'5yttr%^&Y4@asdf##$@34234',
+        secret: 'as#*&*(asf4334@21#$@#1\t2ikl;4j\'32fsda8a4asd\5fet1d42hjk3@#$#\P^\"^%wefrwe19a3f2sED75*^&*5qj$!@#$!#12\+34#\'$!@joUILvxcxcuXds1ik\\laD5$cbv6ef\\\\\fjDASrA87\"345\'yttr%@asdf##$@34234',
         duration: 30 * 60 * 1000,
         activeDuration: 5 * 60 * 1000,
         httpOnly: true,

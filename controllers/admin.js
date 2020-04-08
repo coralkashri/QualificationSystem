@@ -19,8 +19,8 @@ exports.view_admin_panel = async (req, res, next) => {
 
         res.render("pages/admin_panel", {
             access_level: req.session.user ? req.session.user.role : 1,
-            is_logged_in: !!req.session.user,
-            username: req.session.user && req.session.user.username,
+            is_logged_in: !!req.user,
+            username: req.user && req.user.username,
             min_access_required: access_limitations.min_access_required,
             category_name: cat_name
         });
@@ -32,9 +32,9 @@ exports.view_admin_panel = async (req, res, next) => {
 async function standard_management_params_to_render(req, cat_name, route_param_name, async_validation_func) {
     let render_extra_param_name = route_param_name + "_for_details";
     let render_params = {
-        access_level: req.session.user ? req.session.user.role : 1,
-        is_logged_in: !!req.session.user,
-        username: req.session.user && req.session.user.username,
+        access_level: req.user ? req.user.role : 1,
+        is_logged_in: !!req.user,
+        username: req.user && req.user.username,
         min_access_required: access_limitations.min_access_required,
         category_name: cat_name
     };
