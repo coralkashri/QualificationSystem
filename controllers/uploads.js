@@ -23,10 +23,11 @@ exports.upload_files = async (req, res, next) => {
 exports.delete_files = async (req, res, next) => {
     try {
         let file_names = requests_handler.require_param(req, "post", "file_names");
+        file_names = JSON.parse(file_names);
         for (let i = 0; i < file_names.length; i++) {
             fs.unlinkSync(uploads_path + file_names[i]);
         }
-        return responses_gen.generate_response(res, 200, tasks, "File successfully removed.");
+        return responses_gen.generate_response(res, 200, file_names, "File successfully removed.");
     } catch (e) {
         return responses_gen.generate_response(res, 400, null, e.message);
     }

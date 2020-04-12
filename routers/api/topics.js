@@ -8,6 +8,8 @@ router.get("/", topics_controller.get_topics);
 
 router.get("/t:topic_name", topics_controller.get_topic);
 
+router.get("/id:topic_id", topics_controller.get_topic);
+
 router.post("/create/:topic_name", (req, res, next) => { // Create topic
     req.required_level = access_limitations.min_access_required.create_topic;
     req.action_on_reject = _ => {

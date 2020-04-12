@@ -42,11 +42,16 @@ const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 
             });
         };
 
-        let make_strict_chips_object = (id, data, options, forbidden_options, placeholder) => {
+        let prepare_data_for_chips = (data) => {
             let new_data = [];
             for (let i = 0; i < data.length; i++) {
                 new_data.push({tag: data[i]});
             }
+            return new_data;
+        };
+
+        let make_strict_chips_object = (id, data, options, forbidden_options, placeholder) => {
+            let new_data = prepare_data_for_chips(data);
 
             options = options.filter((el) => !forbidden_options.includes(el) );
 
@@ -135,7 +140,7 @@ const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 
             let init_task_text_soft_answer_chips = (elem_id, data) => {
                 data = data || [];
                 $("#" + elem_id).chips({
-                    data: data,
+                    data: prepare_data_for_chips(data),
                     placeholder: "Must Include",
                     secondaryPlaceholder: "+Must Include",
                     onChipAdd: (event) => {
@@ -274,73 +279,60 @@ const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 
                 delete collection[number];
             };
 
-            $scope.add_list_item = (new_val_input_id, collection, collection_name, ul_list_id, list_element_id_prefix) => {
-                let new_val_input_element = $("#" + new_val_input_id);
-                let new_val = new_val_input_element.val();
-                new_val_input_element.val("");
+            $scope.add_list_item = (new_val_model_name, collection) => {
+                let new_val = $scope[new_val_model_name];
+                $scope[new_val_model_name] = "";
                 let is_exists = collection.filter((elem) => elem.toLowerCase() === new_val.toLowerCase()).length !== 0;
                 if (!is_exists) {
-                    let current_elem_number = collection.length;
-                    let current_elem_id = list_element_id_prefix + collection.length;
-                    collection[current_elem_number] = new_val;
-                    $("#" + ul_list_id).append(
-                        $compile(
-                            "<li class=\"row\" id=\"" + current_elem_id + "\">\n" +
-                            "   <div class=\"col s6 m6 l4\">\n" +
-                            "       {{" + collection_name + "[" + current_elem_number + "]}}\n" +
-                            "   </div>\n" +
-                            "   <div class=\"col s2 m1\">\n" +
-                            "       <a class=\"btn-small btn-floating waves-effect waves-light\" ng-click=\"edit_list_item(" + collection_name + ", " + current_elem_number + ");\">\n" +
-                            "           <i class=\"material-icons\">edit</i>\n" +
-                            "       </a>\n" +
-                            "   </div>\n" +
-                            "   <div class=\"col s2 m1\">\n" +
-                            "       <a class=\"btn-small btn-floating waves-effect waves-light\" ng-click=\"delete_list_item(" + collection_name + ", " + current_elem_number + ", '" + list_element_id_prefix + "');\">\n" +
-                            "           <i class=\"material-icons\">delete</i>\n" +
-                            "       </a>\n" +
-                            "   </div>\n" +
-                            "</li>"
-                        )($scope)
-                    );
+                    collection.push(new_val);
                 } else {
                     alertify.error("This value already exists in this list.");
                 }
             };
 
-            $scope.edit_list_item = (collection, number) => {
-                let old_val = collection[number];
-                collection[number] = "";
+            $scope.edit_list_item = (collection, item) => {
+                let old_val = item;
+                let item_idx = collection.indexOf(item);
+                collection[item_idx] = "";
                 let new_option = prompt("Edit option:", old_val);
-                let is_exists = collection.filter((elem) => elem.toLowerCase() === new_option.toLowerCase()).length !== 0;
                 if (new_option) {
+                    let is_exists = collection.filter((elem) => elem.toLowerCase() === new_option.toLowerCase()).length !== 0;
                     if (!is_exists) {
-                        collection[number] = new_option;
+                        collection[item_idx] = new_option;
                         return true;
                     } else {
                         alertify.error("This value already exists in this list.");
                     }
                 }
-                collection[number] = old_val;
+                collection[item_idx] = old_val;
                 return false;
             };
 
-            $scope.delete_list_item = (collection, number, list_element_id_prefix) => {
-                list_element_id_prefix += number;
-                delete collection[number];
-                $("#" + list_element_id_prefix).remove();
+            $scope.delete_list_item = (collection, item) => {
+                collection.splice(collection.indexOf(item), 1);
             };
 
             $scope.get_task_details = (task_id) => {
                 admin_tasks_s.get_task_details(task_id).done((task_data) => {
                     attach_extract_chips_data_to_specific_collection("task_data","get_search_keywords","search_keywords");
 
+                    // Init files section
+                    $scope.task_data.files = [];
+                    $scope.task_data.files[0] = [];
+
                     $("#search_keywords").chips({
-                        data: task_data.search_keywords,
+                        data: prepare_data_for_chips(task_data.search_keywords),
                         placeholder: "Keyword",
                         secondaryPlaceholder: "+Keyword"
                     });
 
                     init_task_text_soft_answer_chips("task_text_soft_answer", task_data.answer);
+
+                    $scope.get_all_topics().done(() => {
+                        $scope.get_topic_by_id(task_data.topic_id).done((topic_data) => {
+                            task_data.topic_name = topic_data.name;
+                        });
+                    });
 
                     let temp_code_sections = task_data.code_sections;
                     task_data.code_sections = [];
@@ -352,17 +344,16 @@ const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 
                     let temp_answer_options = task_data.answer_options;
                     task_data.answer_options = [];
                     for (let i = 0; i < temp_answer_options.length; i++) {
+                        $scope.new_boolean_option = temp_answer_options[i];
                         $scope.add_new_boolean_option();
-                        task_data.answer_options[i] = temp_answer_options[i];
                     }
-
-
 
                     $interval(() => {
                         $scope.original_task_title = task_data.title;
                         $timeout(() => {
-                            M.textareaAutoResize($('#details'));
+                            $('.materialize-textarea').each((idx, elem) => M.textareaAutoResize(elem));
                             M.updateTextFields();
+                            $('select').formSelect();
                         }, 10);
                     }, 10, 50);
                 });

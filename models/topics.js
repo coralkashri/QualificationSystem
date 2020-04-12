@@ -10,17 +10,26 @@ const access_limitations = require('../helpers/configurations/access_limitations
  *
  * @param req
  * req["query"]["topic_name"] - Topic name
+ * req["query"]["topic_name"] - Topic id
+ * -- One of them must exists, if both exists check for name
  *
  * @returns true if exists, else false.
  */
 let is_topic_exists = async (req, res, next) => {
     let topics_db_model = database.topics_model();
-    let topic_name = requests_handler.require_param(req, "get", "topic_name");
-    let query = {
-        name: {
-            $regex: new RegExp('^' + topic_name.toLowerCase() + '$', 'i') // case-insensitive
-        }
-    };
+    let topic_name = requests_handler.optional_param(req, "get", "topic_name");
+    let topic_id;
+    let query;
+    if (!topic_name) {
+        topic_id = requests_handler.require_param(req, "get", "topic_id");
+        query = {_id: topic_id};
+    } else {
+        query = {
+            name: {
+                $regex: new RegExp('^' + topic_name.toLowerCase() + '$', 'i') // case-insensitive
+            }
+        };
+    }
     let query_res = await topics_db_model.find(query).exec();
     return query_res.length > 0;
 };
@@ -37,7 +46,7 @@ exports.is_topic_exists = is_topic_exists;
  * @throws Assert exception if topic not found.
  */
 let get_topic_id = async (req, res, next) => {
-    assert.ok(is_topic_exists(req, res, next), "Topic not found.");
+    assert.ok(await is_topic_exists(req, res, next), "Topic not found.");
     let topics_db_model = database.topics_model();
     let topic_name = requests_handler.require_param(req, "get", "topic_name");
     let query_res = await topics_db_model.find({name: topic_name}, "_id").exec();
@@ -51,17 +60,30 @@ exports.get = async (req, res, next) => {
     let topics_db_model = database.topics_model();
 
     // Get params
-    let target_topic;
-    target_topic = requests_handler.optional_param(req, "route","topic_name");
+    let target_topic_name, target_topic_id;
+    target_topic_name = requests_handler.optional_param(req, "route","topic_name");
+    target_topic_id = requests_handler.optional_param(req, "route","topic_id");
 
     // Prepare query
     let query;
-    if (target_topic) {
+    if (target_topic_name) {
+        // Validation
         let req = {query: {}};
-        req.query.topic_name = target_topic;
-        assert.ok(is_topic_exists(req, {}, {}), "Topic not found.");
-        query = {name: target_topic};
+        req.query.topic_name = target_topic_name;
+        assert.ok(await is_topic_exists(req, {}, {}), "Topic not found.");
+
+        // Prepare query
+        query = {name: target_topic_name};
+    } else if (target_topic_id) {
+        // Validation
+        let req = {query: {}};
+        req.query.topic_id = target_topic_id;
+        assert.ok(await is_topic_exists(req, {}, {}), "Topic not found.");
+
+        // Prepare query
+        query = {_id: target_topic_id};
     } else {
+        // Prepare query
         query = {};
     }
 

@@ -52,7 +52,7 @@ angular.module("adminTasksM", [])
                     details: task_data.details,
                     search_keywords: JSON.stringify(task_data.get_search_keywords()),
                     check_point: task_data.check_point,
-                    code_sections: JSON.stringify(task_data.code_sections),
+                    code_sections: JSON.stringify(task_data.code_sections.filter((elem) => !!elem)),
                     answer_type: task_data.answer_type,
                     answer_options: JSON.stringify(task_data.answer_options),
                     answer: JSON.stringify(task_data.answer),
@@ -113,7 +113,7 @@ angular.module("adminTasksM", [])
                     details: task_data.details,
                     search_keywords: JSON.stringify(task_data.get_search_keywords()),
                     check_point: task_data.check_point,
-                    code_sections: JSON.stringify(task_data.code_sections),
+                    code_sections: JSON.stringify(task_data.code_sections.filter((elem) => !!elem)),
                     answer_type: task_data.answer_type,
                     answer_options: JSON.stringify(task_data.answer_options),
                     answer: JSON.stringify(task_data.answer),
@@ -123,7 +123,7 @@ angular.module("adminTasksM", [])
                 };
 
                 // Collect files
-                pre_params.file_names = pre_params.file_names || [];
+                pre_params.file_names = task_data.file_names || [];
                 let promises = [];
                 let files_inputs = $("#files_section input[type='file']");
                 for (let i = 0; i < files_inputs.length; i++) {
@@ -274,8 +274,8 @@ angular.module("adminTasksM", [])
             }).then((response) => {
                 response = response.data;
                 alertify.success(response.message);
-                _$scope.topic_data = response.data[0];
-                deferred.resolve(_$scope.topic_data);
+                _$scope.task_data = response.data[0];
+                deferred.resolve(_$scope.task_data);
             }, (response) => {
                 response = response.data;
                 alertify.error(response.message);

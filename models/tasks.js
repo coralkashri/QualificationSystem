@@ -35,6 +35,90 @@ let tasks_number_within_topic = async (req, res, next) => {
     return query_res.length;
 };
 
+let get_task_topic_id = async (task_id) => {
+    let tasks_db_model = database.tasks_model();
+    let query_res = await tasks_db_model.find({_id: task_id}).exec();
+    return query_res[0].topic_id;
+};
+
+let is_task_topic_changed = async (task_id, new_topic_id) => {
+    let tasks_db_model = database.tasks_model();
+    let query_res = await tasks_db_model.find({_id: task_id, topic_id: new_topic_id}).exec();
+    return !query_res.length;
+};
+
+let is_task_inner_topic_order_changed = async (task_id, new_inner_topic_order) => {
+    let tasks_db_model = database.tasks_model();
+    let query_res = await tasks_db_model.find({_id: task_id, inner_topic_order: new_inner_topic_order}).exec();
+    return !query_res.length;
+};
+
+let get_new_place_order_in_topic = async (topic_id) => {
+    return await tasks_number_within_topic({query: {topic_id}}, {}, {});
+};
+
+/**
+ *
+ * @param topic_id
+ * @param new_place
+ * @returns If the place > # of tasks within the topic, returns get_new_place_order_in_topic
+ *          If the place < # of tasks within the topic, returns (param) new_place
+ *
+ * @see get_new_place_order_in_topic
+ */
+let get_legal_inner_order_within_topic = async (topic_id, new_place) => {
+    let number_of_tasks_within_the_topic = await tasks_number_within_topic({query: {topic_id}}, {}, {});
+    return Math.min(number_of_tasks_within_the_topic, new_place);
+};
+
+let rearrange_task_within_topic = async (task_id, new_topic_id, new_task_place) => {
+    let tasks_db_model = database.tasks_model();
+    let topic_id = new_topic_id || await get_task_topic_id(task_id);
+    let new_task_inner_topic_order = await get_legal_inner_order_within_topic(topic_id, new_task_place);
+
+    let filter, update = {};
+    if (new_task_inner_topic_order === new_task_place) {
+        filter = {
+            topic_id: new_topic_id,
+            inner_topic_order: {
+                $gte: new_task_inner_topic_order
+            }
+        };
+        update["$inc"] = {
+            inner_topic_order: 1
+        };
+    } else {
+        filter = {
+            _id: task_id
+        };
+    }
+    update["$set"] = {
+        inner_topic_order: new_task_inner_topic_order
+    };
+    await tasks_db_model.update(filter, update).exec();
+};
+
+let fix_popout_tasks_order_within_topic = async (task_id) => {
+    let tasks_db_model = database.tasks_model();
+
+    let task_details = await tasks_db_model.find({_id: task_id}).exec();
+    task_details = task_details[0];
+
+    let filter, update;
+    filter = {
+        topic_id: task_details.topic_id,
+        inner_topic_order: {
+            $gt: task_details.inner_topic_order
+        }
+    };
+    update = {
+        $inc: {
+            inner_topic_order: -1
+        }
+    };
+    await tasks_db_model.update(filter, update).exec();
+};
+
 exports.get = async (req, res, next) => {
     // Get DB
     let tasks_db_model = database.tasks_model();
@@ -49,7 +133,7 @@ exports.get = async (req, res, next) => {
         let req = {query: {}};
         req.query.task_id = target_task;
         assert.ok(is_task_exists(req, {}, {}), "Task not found.");
-        query = {name: target_task};
+        query = {_id: target_task};
     } else {
         query = {};
     }
@@ -76,25 +160,25 @@ exports.create = async (req, res, next) => {
     let topic_name;
 
     // Get Required Params
-    task_title = requests_handler.require_param(req, "post", "title");
-    topic_name = requests_handler.require_param(req, "post", "topic_name");
-    task_details = requests_handler.require_param(req, "post", "details");
+    task_title      =   requests_handler.require_param(req, "post", "title");
+    topic_name      =   requests_handler.require_param(req, "post", "topic_name");
+    task_details    =   requests_handler.require_param(req, "post", "details");
 
     // Get Optional Params
-    task_search_keywords = requests_handler.optional_param(req, "post", "search_keywords");
-    task_code_sections = requests_handler.optional_param(req, "post", "code_sections");
-    task_check_point = requests_handler.optional_param(req, "post", "check_point");
-    task_answer_type = requests_handler.optional_param(req, "post", "answer_type");
-    task_answer_options = requests_handler.optional_param(req, "post", "answer_options");
-    task_judgement_criteria = requests_handler.optional_param(req, "post", "judgement_criteria");
-    task_hints = requests_handler.optional_param(req, "post", "hints");
-    task_plan_exceptions = requests_handler.optional_param(req, "post", "plan_exceptions");
-    task_related_file_names = requests_handler.optional_param(req, "post", "file_names");
-    task_answer = requests_handler.optional_param(req, "post", "answer");
+    task_search_keywords    =   requests_handler.optional_param(req, "post", "search_keywords");
+    task_code_sections      =   requests_handler.optional_param(req, "post", "code_sections");
+    task_check_point        =   requests_handler.optional_param(req, "post", "check_point");
+    task_answer_type        =   requests_handler.optional_param(req, "post", "answer_type");
+    task_answer_options     =   requests_handler.optional_param(req, "post", "answer_options");
+    task_judgement_criteria =   requests_handler.optional_param(req, "post", "judgement_criteria");
+    task_hints              =   requests_handler.optional_param(req, "post", "hints");
+    task_plan_exceptions    =   requests_handler.optional_param(req, "post", "plan_exceptions");
+    task_related_file_names =   requests_handler.optional_param(req, "post", "file_names");
+    task_answer             =   requests_handler.optional_param(req, "post", "answer");
 
     // Process Middleware Values
     topic_id = await topics_model.get_topic_id({query:{topic_name: topic_name}}, {}, {}); // TODO check this output
-    task_inner_topic_order = await tasks_number_within_topic({query: {topic_id}}, {}, {});
+    task_inner_topic_order = await get_new_place_order_in_topic(topic_id);
 
     // Arrange data
     let data = {
@@ -162,7 +246,26 @@ exports.modify = async (req, res, next) => {
     task_related_file_names = requests_handler.optional_param(req, "post", "file_names");
 
     // Process Middleware Values
-    topic_id = await topics_model.get_topic_id({query:{topic_name: topic_name}}, {}, {}); // TODO check this output
+    let is_topic_changed, is_inner_order_changed;
+    is_topic_changed = is_inner_order_changed = false;
+    if (topic_name) {
+        topic_id = await topics_model.get_topic_id({query: {topic_name: topic_name}}, {}, {}); // TODO check this output
+        is_topic_changed = await is_task_topic_changed(target_task, topic_id);
+
+        // Decrease all previous topic's tasks inner order, that were after the current updated task
+        await fix_popout_tasks_order_within_topic(target_task);
+    }
+
+    if (task_inner_topic_order) {
+        is_inner_order_changed = await is_task_inner_topic_order_changed(target_task, task_inner_topic_order);
+    }
+
+    // Pre Validations / Pre Process
+    if (is_inner_order_changed) {
+        await rearrange_task_within_topic(target_task, topic_id, task_inner_topic_order);
+    } else if (is_topic_changed) {
+        task_inner_topic_order = await get_new_place_order_in_topic(topic_id);
+    }
 
     // Arrange data
     let data = {};
@@ -174,7 +277,7 @@ exports.modify = async (req, res, next) => {
     requests_handler.validate_and_set_basic_optional_input(task_inner_topic_order, data, "inner_topic_order");
     requests_handler.validate_and_set_array_optional_input(task_search_keywords, data, "search_keywords");
     requests_handler.validate_and_set_basic_optional_input(task_check_point, data, "check_point");
-    requests_handler.validate_and_set_basic_optional_input(task_code_sections, data, "code_sections");
+    requests_handler.validate_and_set_array_optional_input(task_code_sections, data, "code_sections");
     requests_handler.validate_and_set_basic_optional_input(task_answer_type, data, "answer_type");
     requests_handler.validate_and_set_array_optional_input(task_answer_options, data, "answer_options");
     requests_handler.validate_and_set_array_optional_input(task_judgement_criteria, data, "judgement_criteria");

@@ -55,7 +55,7 @@
     </div>
 <% } else if (action == "view" && typeof task_id_for_details !== "undefined") { %>
     <!--Show specific task details-->
-    <div ng-init="get_task_details('<%= task_id_for_details %>');">
+    <div ng-init="get_task_details('<%= task_id_for_details %>'); init_modify_task_page();">
         <h4>{{original_task_title}}</h4><br>
         <form ng-submit="modify_task(task_data);">
 
@@ -220,10 +220,15 @@
                             </div>
                             <div class="col s2 m1">
                                 <a class="btn-small btn-floating waves-effect waves-light"
-                                   ng-click="edit_list_item(task_data.judgement_criteria, criterion);"></a>
+                                   ng-click="edit_list_item(task_data.judgement_criteria, criterion);">
+                                    <i class="material-icons">edit</i>
+                                </a>
                             </div>
                             <div class="col s2 m1">
-                                <a class="btn-small btn-floating waves-effect waves-light"></a>
+                                <a class="red btn-small btn-floating waves-effect waves-light"
+                                   ng-click="delete_list_item(task_data.judgement_criteria, criterion);">
+                                    <i class="material-icons">delete</i>
+                                </a>
                             </div>
                         </li>
                     </ul>
@@ -231,14 +236,14 @@
                 <div class="col s12">
                     <div class="file-field input-field">
                         <div class="btn waves-effect waves-light"
-                             ng-click="add_list_item('new_judgement_criterion', task_data.judgement_criteria, 'task_data.judgement_criteria', 'task_judgement_criteria', 'task_judgement_criterion_');">
+                             ng-click="add_list_item('new_judgement_criterion', task_data.judgement_criteria);">
                             <span>
                                 <i class="material-icons">add</i>
                             </span>
                         </div>
                         <div class="file-path-wrapper">
                             <!--TODO add submit on enter-->
-                            <input id="new_judgement_criterion" placeholder="New Jugement Criterion" type="text">
+                            <input id="new_judgement_criterion" ng-model="new_judgement_criterion" placeholder="New Jugement Criterion" type="text">
                         </div>
                     </div>
                 </div>
@@ -248,18 +253,36 @@
             <div class="row">
                 <div class="col s12">
                     <div>Hints:</div>
-                    <ul id="task_hints"></ul>
+                    <ul id="task_hints">
+                        <li ng-repeat="hint in task_data.hints" class="row">
+                            <div class="col s6 m6 l4">
+                                {{hint}}
+                            </div>
+                            <div class="col s2 m1">
+                                <a class="btn-small btn-floating waves-effect waves-light"
+                                   ng-click="edit_list_item(task_data.hints, hint);">
+                                    <i class="material-icons">edit</i>
+                                </a>
+                            </div>
+                            <div class="col s2 m1">
+                                <a class="red btn-small btn-floating waves-effect waves-light"
+                                   ng-click="delete_list_item(task_data.hints, hint);">
+                                    <i class="material-icons">delete</i>
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
                 <div class="col s12">
                     <div class="file-field input-field">
-                        <div class="btn waves-effect waves-light" ng-click="add_list_item('new_hint', task_data.hints, 'task_data.hints', 'task_hints', 'task_hint_');">
+                        <div class="btn waves-effect waves-light" ng-click="add_list_item('new_hint', task_data.hints);">
                             <span>
                                 <i class="material-icons">add</i>
                             </span>
                         </div>
                         <div class="file-path-wrapper">
                             <!--TODO add submit on enter-->
-                            <input id="new_hint" placeholder="New Hint" type="text">
+                            <input id="new_hint" ng-model="new_hint" placeholder="New Hint" type="text">
                         </div>
                     </div>
                 </div>
@@ -459,19 +482,37 @@
             <div class="row">
                 <div class="col s12">
                     <div>Judgement Criteria:</div>
-                    <ul id="task_judgement_criteria"></ul>
+                    <ul id="task_judgement_criteria">
+                        <li ng-repeat="criterion in task_data.judgement_criteria" class="row">
+                            <div class="col s6 m6 l4">
+                                {{criterion}}
+                            </div>
+                            <div class="col s2 m1">
+                                <a class="btn-small btn-floating waves-effect waves-light"
+                                   ng-click="edit_list_item(task_data.judgement_criteria, criterion);">
+                                    <i class="material-icons">edit</i>
+                                </a>
+                            </div>
+                            <div class="col s2 m1">
+                                <a class="red btn-small btn-floating waves-effect waves-light"
+                                   ng-click="delete_list_item(task_data.judgement_criteria, criterion);">
+                                    <i class="material-icons">delete</i>
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
                 <div class="col s12">
                     <div class="file-field input-field">
                         <div class="btn waves-effect waves-light"
-                             ng-click="add_list_item('new_judgement_criterion', task_data.judgement_criteria, 'task_data.judgement_criteria', 'task_judgement_criteria', 'task_judgement_criterion_');">
+                             ng-click="add_list_item('new_judgement_criterion', task_data.judgement_criteria);">
                             <span>
                                 <i class="material-icons">add</i>
                             </span>
                         </div>
                         <div class="file-path-wrapper">
                             <!--TODO add submit on enter-->
-                            <input id="new_judgement_criterion" placeholder="New Jugement Criterion" type="text">
+                            <input id="new_judgement_criterion" ng-model="new_judgement_criterion" placeholder="New Jugement Criterion" type="text">
                         </div>
                     </div>
                 </div>
@@ -481,18 +522,36 @@
             <div class="row">
                 <div class="col s12">
                     <div>Hints:</div>
-                    <ul id="task_hints"></ul>
+                    <ul id="task_hints">
+                        <li ng-repeat="hint in task_data.hints" class="row">
+                            <div class="col s6 m6 l4">
+                                {{hint}}
+                            </div>
+                            <div class="col s2 m1">
+                                <a class="btn-small btn-floating waves-effect waves-light"
+                                   ng-click="edit_list_item(task_data.hints, hint);">
+                                    <i class="material-icons">edit</i>
+                                </a>
+                            </div>
+                            <div class="col s2 m1">
+                                <a class="red btn-small btn-floating waves-effect waves-light"
+                                   ng-click="delete_list_item(task_data.hints, hint);">
+                                    <i class="material-icons">delete</i>
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
                 <div class="col s12">
                     <div class="file-field input-field">
-                        <div class="btn waves-effect waves-light" ng-click="add_list_item('new_hint', task_data.hints, 'task_data.hints', 'task_hints', 'task_hint_');">
+                        <div class="btn waves-effect waves-light" ng-click="add_list_item('new_hint', task_data.hints);">
                             <span>
                                 <i class="material-icons">add</i>
                             </span>
                         </div>
                         <div class="file-path-wrapper">
                             <!--TODO add submit on enter-->
-                            <input id="new_hint" placeholder="New Hint" type="text">
+                            <input id="new_hint" ng-model="new_hint" placeholder="New Hint" type="text">
                         </div>
                     </div>
                 </div>
