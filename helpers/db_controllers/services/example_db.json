@@ -26,24 +26,24 @@
         { // Exception 1 block
           "plans": [
             {
-              "name": "Developer",
+              "id": "100",
               "text": "Ctrl+C"
             }, {
-              "name": "Researcher",
+              "id": "101",
               "text": "Special keyword"
             }
           ]
         }, { // Exception 2 block
           "plans": [
             {
-              "name": "Developer",
+              "id": "100",
               "text": "Clear code"
             }
           ]
         }, { // Exception 3 block
           "plans": [
             {
-              "name": "Researcher",
+              "id": "101",
               "text": "Use std::vector"
             }
           ]

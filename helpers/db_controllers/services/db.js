@@ -80,18 +80,27 @@ let init_tasks_schema = async _ => {
             enum: ["NONE", "SOFT", "STRONG"],
             default: "NONE"
         },
-        task_type: {
+        answer_type: {
             type: String,
-            enum: ["TEXT", "CODE", "NUMBER", "BOOLEAN"],
+            enum: ["TEXT_STRONG", "TEXT_SOFT", "TEXT_FREE", "FILES", "COMPILATION_RESULT", "BOOLEAN", "MULTIPLE_CHOICES"],
+            // Auto Test for: TEXT_STRONG, TEXT_SOFT, COMPILATION_RESULT, BOOLEAN, MULTIPLE_CHOICES
+            // No Auto Test for: TEXT_FREE, FILES
             default: "TEXT"
         },
+        file_names: [String],
+        answer_options: [String], // For boolean
+        code_sections: [String],
         judgement_criteria: [String],
         hints: [String],
         plan_exceptions: [
             { // Exception block
                 plans: [
                     { // Plan block
-                        name: {
+                        id: {
+                            type: String,
+                            required: true
+                        },
+                        section: {
                             type: String,
                             required: true
                         },
@@ -103,10 +112,7 @@ let init_tasks_schema = async _ => {
                 ]
             }
         ],
-        answer: { // TODO
-            type: String,
-            required: true
-        }
+        answer: [String]
     });
 
     // Create systems model
@@ -154,11 +160,8 @@ let init_users_schema = _ => {
                             type: String,
                             required: true
                         },
-                        answer: { // TODO
-                            type: String,
-                            required: true
-                        },
-                        reviewer: { // Reviewer user id
+                        answer: [String], // TODO make it required
+                        reviewer: { // Reviewer user id || "System" => For auto test
                             type: String,
                             required: true
                         }
@@ -170,7 +173,17 @@ let init_users_schema = _ => {
                             type: String,
                             required: true
                         },
-                        answer: { // TODO
+                        answer: [String] // TODO make it required
+                    }
+                ],
+                declined_tasks: [
+                    {
+                        id: {
+                            type: String,
+                            required: true
+                        },
+                        answer: [String], // TODO make it required
+                        last_reviewer: { // Reviewer user id
                             type: String,
                             required: true
                         }
@@ -186,10 +199,7 @@ let init_users_schema = _ => {
                         enum: ["In Progress", "Waiting", "In Review", "Completed"], // If completed, this is the last task in the plan
                         default: "In Progress"
                     },
-                    answer: { // TODO
-                        type: String,
-                        default: ""
-                    }
+                    answer: [String]
                 }
             }
         ]

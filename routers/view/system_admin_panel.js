@@ -31,7 +31,7 @@ router.get("/topics-management/new-topic", admin_controller.view_topics_manageme
 
 
 // Tasks
-router.get("/tasks-management/:task_id", admin_controller.view_tasks_management_page);
+router.get("/tasks-management/t:task_id", admin_controller.view_tasks_management_page);
 
 router.get("/tasks-management/new-task", admin_controller.view_tasks_management_page);
 

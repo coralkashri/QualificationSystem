@@ -15,7 +15,7 @@ let app = express()
 
     .use('/scripts', express.static(__dirname + '/node_modules/mark.js/dist/'))
 
-    .use('/uploads', express.static(__dirname + '/helpers/db_controllers/uploads'))
+    .use('/uploads_dir', express.static(__dirname + '/helpers/db_controllers/uploads'))
 
     .use(session({
         cookieName: 'session',

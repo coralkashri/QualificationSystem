@@ -15,7 +15,6 @@ exports.require_param = (req, param_type, param_name) => {
     }
     const value = req[param_type][param_name];
     assert.notEqual(value, undefined, "Missing " + param_name + " param.");
-    //if (value === undefined) throw new Error("Missing " + param_name + " param.");
     return value;
 };
 
@@ -47,7 +46,7 @@ exports.validate_and_set_basic_optional_input = (input, dst_obj, prop) => {
 
 exports.validate_and_set_array_optional_input = (input, dst_obj, prop) => {
     if (validate_basic_input(input)) {
-        input = input && input.split(',');
+        input = input && JSON.parse(input);
         dst_obj[prop] = input || [];
     }
 };

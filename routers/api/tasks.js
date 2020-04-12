@@ -16,6 +16,7 @@ router.post("/create", (req, res, next) => { // Create topic
     next();
 }, con_validator.require_access_level, tasks_controller.create);
 
+// TODO create another route to remove files from the system, use this route only to add new files to the selected task
 router.post("/modify/:task_id", (req, res, next) => { // Modify topic
     req.required_level = access_limitations.min_access_required.modify_tasks;
     req.action_on_reject = _ => {

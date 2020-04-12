@@ -93,7 +93,7 @@ exports.view_tasks_management_page = async (req, res, next) => {
     try {
         let cat_name = "tasks-management";
         let route_param_name = "task_id";
-        //let render_params = await standard_management_params_to_render(req, cat_name, route_param_name, tasks_model.is_task_exists); // TODO uncomment this line
+        let render_params = await standard_management_params_to_render(req, cat_name, route_param_name, tasks_model.is_task_exists);
         res.render("pages/admin_panel", render_params);
     } catch (e) {
         return responses_gen.generate_response(res, 400, null, e.message);

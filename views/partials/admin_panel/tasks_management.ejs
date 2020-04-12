@@ -1,68 +1,272 @@
+<span ng-init="init_tasks_page();"></span>
+
 <% if (typeof action === 'undefined') { %>
     <!--Show all users list-->
-    <div class="row" ng-init="get_all_users(); current_username = '<%=username%>';">
-        <div class="col s6 m3"><b>Username</b></div>
-        <div class="col s4 m1"><b>Role</b></div>
-        <div class="col s2 m1"><b>Actions</b></div>
-    </div>
-    <div class="row" ng-repeat="user_data in users_list | orderBy: ['-role']">
-        <div ng-class="{'selected-row': user_data.username === current_username}" class="col s6 m3">
-            <b ng-if="user_data.username === current_username">
-                <a href="/view/admin-panel/users-management/u{{user_data.username}}">{{user_data.username}}</a>
-            </b>
-            <span ng-if="user_data.username !== current_username">
-                <a href="/view/admin-panel/users-management/u{{user_data.username}}">{{user_data.username}}</a>
-            </span>
-        </div>
-        <div ng-class="{'selected-row': user_data.username === current_username}" class="col s4 m1">
-            <b ng-if="user_data.username === current_username">
-                {{get_role_name(user_data.role)}}
-            </b>
-            <span ng-if="user_data.username !== current_username">
-                {{get_role_name(user_data.role)}}
-            </span>
-        </div>
-        <div ng-if="user_data.username !== current_username" class="col s2 m1">
-            <button class="red btn-small btn-floating waves-effect waves-light" ng-click="delete_user(user_data.username)">
-                <i class="material-icons">delete</i>
-            </button>
-        </div>
-    </div>
-    <div class="row" ng-init="get_all_users()">
+    <span ng-init="get_all_topics();"></span>
+    <ul class="collapsible popout">
+        <li ng-repeat="task_data in topics_list | orderBy: ['-is_active', 'name']">
+            <div class="collapsible-header" ng-class="{grey: !task_data.is_active}">{{task_data.name}}</div>
+
+            <div class="collapsible-body">
+                <div ng-if="!task_data.is_active">
+                    <div class="valign-wrapper flash flash-warn" style="width: 100%;">
+                        <i class="material-icons" style="padding-right: 5px;">warning</i>
+                        This topic is currently inactive.
+                    </div>
+                </div>
+                <div>{{task_data.description}}</div>
+            </div>
+
+            <div class="collapsible-footer">
+                <a class="btn-small waves-effect waves-light"
+                   href="/view/admin-panel/topics-management/t{{task_data.name}}"
+                   title="Management">
+                    <i class="material-icons">settings</i>
+                </a>
+
+                <a ng-if="task_data.is_active"
+                   class="btn-small waves-effect waves-light"
+                   ng-click="archive_topic(task_data.name);"
+                   title="Archive">
+                    <i class="material-icons">archive</i>
+                </a>
+
+                <a ng-if="!task_data.is_active"
+                   class="btn-small waves-effect waves-light"
+                   ng-click="reactivate_topic(task_data.name);"
+                   title="Reactivate">
+                    <i class="material-icons">unarchive</i>
+                </a>
+
+                <a class="btn-small waves-effect waves-light"
+                   ng-click="delete_topic(task_data.name);"
+                   title="Delete">
+                    <i class="material-icons">delete</i>
+                </a>
+            </div>
+        </li>
+    </ul>
+    <div class="row">
         <div class="col s12 m4">
-            <a class="btn-small btn-floating waves-effect waves-light" href="/view/admin-panel/users-management/new-user">
+            <a class="btn-small btn-floating waves-effect waves-light" href="/view/admin-panel/tasks-management/new-task">
                 <i class="material-icons">add</i>
             </a>
         </div>
     </div>
-<% } else if (action == "view" && typeof username_for_details !== "undefined") { %>
-    <!--Show specific user details-->
-    <div ng-init="get_user_details('<%= username_for_details %>')">
-        <h4>{{user_data.username}}</h4><br>
-        <form ng-submit="modify_user(user_data.username);">
+<% } else if (action == "view" && typeof task_id_for_details !== "undefined") { %>
+    <!--Show specific task details-->
+    <div ng-init="get_task_details('<%= task_id_for_details %>');">
+        <h4>{{original_task_title}}</h4><br>
+        <form ng-submit="modify_task(task_data);">
+
+            <!--Task's Title-->
             <div class="row">
                 <div class="input-field col s12">
-                    <input id="username" type="text" class="validate">
-                    <label for="username">Username</label>
+                    <input id="task_title" ng-model="task_data.title" type="text" class="validate">
+                    <label for="task_title">Task Title</label>
                 </div>
             </div>
+
+            <!--Topic Name selection-->
             <div class="row">
                 <div class="input-field col s12">
-                    <input id="password" type="password" class="validate">
-                    <label for="password">Password</label>
+                    <select id="task_topic_name" ng-model="task_data.topic_name">
+                        <option value="" disabled selected>Select Topic</option>
+                        <option value="{{topic_data.name}}" ng-repeat="topic_data in topics_list | orderBy: ['-is_active', 'name']">{{topic_data.name}}</option>
+                    </select> <!--Update in js-->
+                    <label for="task_topic_name">Select Topic</label>
                 </div>
             </div>
+
+            <!--Task's Details-->
             <div class="row">
                 <div class="input-field col s12">
-                    <select id="user_role">
-                        <option value="3">Admin</option>
-                        <option value="2">Manger</option>
-                        <option value="1">User</option>
-                        <option value="0">Banned</option>
+                    <textarea id="details" ng-model="task_data.details" class="validate materialize-textarea"></textarea>
+                    <label for="details">Details</label>
+                </div>
+            </div>
+
+            <!--Search Keywords-->
+            <div class="row">
+                <div class="col s12">
+                    <div>Search keywords:</div>
+                    <div class="input-field col s12 chips" id="search_keywords"></div>
+                </div>
+            </div>
+
+            <!--Check Point type-->
+            <div class="row">
+                <div class="input-field col s12">
+                    <select id="check_point" ng-model="task_data.check_point">
+                        <option selected value="NONE">None</option>
+                        <option value="SOFT">Soft</option>
+                        <option value="STRONG">Strong</option>
                     </select>
-                    <label for="user_role">Role</label>
+                    <label for="check_point">Check Point</label>
                 </div>
             </div>
+
+            <!--Files Sections-->
+            <div class="row" ng-if="task_data.file_names.length > 0">
+                <div class="col s12">
+                    <div>Current Files:</div>
+                    <ul id="task_current_files_list">
+                        <li ng-repeat="filename in task_data.file_names" class="row">
+                            <div class="col s6">
+                                {{filename}}
+                            </div>
+                            <div class="col s6">
+                                <a class="btn-small btn-floating waves-effect waves-light" ng-click="remove_file_from_task(task_data, filename);">
+                                    <i class="material-icons">delete</i>
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col s12" id="files_section">
+                    <div id="file_section_block_0">
+                        <div class="file-field input-field" id="file_section_0">
+                            <div class="btn">
+                                <span>Files</span>
+                                <input type="file" multiple>
+                            </div>
+                            <div class="file-path-wrapper">
+                                <input class="file-path validate" type="text" placeholder="Upload one or more files">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col s12">
+                    <a class="btn-small waves-effect waves-light" ng-click="add_input_row('files_section', 'file', task_data.files);">
+                        Add more files from different directory
+                    </a>
+                </div>
+            </div>
+
+            <!--Codes Sections-->
+            <div class="row">
+                <div class="col s12" id="codes_section"></div>
+                <div style="padding-top: 10px;" class="col s12">
+                    <a class="btn-small waves-effect waves-light" ng-click="add_input_row('codes_section', 'code', task_data.code_sections);">
+                        Add code section
+                    </a>
+                </div>
+            </div>
+
+            <!--Answer type-->
+            <div class="row">
+                <div class="input-field col s12">
+                    <select id="answer_type" ng-model="task_data.answer_type" ng-change="change_answer_type();">
+                        <option selected value="TEXT_STRONG">Text (Strong match)</option>
+                        <option value="TEXT_SOFT">Text (Soft match)</option>
+                        <option value="TEXT_FREE">Text (Human check)</option>
+                        <option value="FILES">Files / Videos / Code Files</option>
+                        <option disabled value="COMPILATION_RESULT">Compilation result (code)</option>
+                        <option value="BOOLEAN">Boolean</option>
+                        <option value="MULTIPLE_CHOICES">Multiple Choices</option>
+                    </select>
+                    <label for="answer_type">Answer Type</label>
+                </div>
+            </div>
+
+            <!--BOOLEAN / MULTIPLE_CHOICES answer-->
+            <div ng-show="task_data.answer_type == 'BOOLEAN' || task_data.answer_type == 'MULTIPLE_CHOICES'" class="row">
+                <div class="col s12">
+                    <div>Answer Options:</div>
+                    <ul id="task_answer_boolean_options"></ul>
+                </div>
+                <div class="col s12">
+                    <div class="file-field input-field">
+                        <div class="btn waves-effect waves-light" ng-click="add_new_boolean_option();">
+                            <span>
+                                <i class="material-icons">add</i>
+                            </span>
+                        </div>
+                        <div class="file-path-wrapper">
+                            <!--TODO add submit on enter-->
+                            <input id="new_boolean_option" placeholder="New Option" ng-model="new_boolean_option" type="text">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--TEXT_STRONG answer-->
+            <div ng-show="task_data.answer_type == 'TEXT_STRONG'" class="row">
+                <div class="input-field col s12">
+                    <input id="task_text_strong_answer" ng-model="task_data.answer[0]" type="text" class="validate">
+                    <label for="task_text_strong_answer">Answer</label>
+                </div>
+            </div>
+
+            <!--TEXT_SOFT answer-->
+            <div ng-show="task_data.answer_type == 'TEXT_SOFT'"  class="row">
+                <div class="col s12">
+                    <div>Answer:</div>
+                    <div class="input-field col s12 chips" id="task_text_soft_answer"></div>
+                </div>
+            </div>
+
+            <!--Judgement Criteria-->
+            <div class="row">
+                <div class="col s12">
+                    <div>Judgement Criteria:</div>
+                    <ul id="task_judgement_criteria">
+                        <li ng-repeat="criterion in task_data.judgement_criteria" class="row">
+                            <div class="col s6 m6 l4">
+                                {{criterion}}
+                            </div>
+                            <div class="col s2 m1">
+                                <a class="btn-small btn-floating waves-effect waves-light"
+                                   ng-click="edit_list_item(task_data.judgement_criteria, criterion);"></a>
+                            </div>
+                            <div class="col s2 m1">
+                                <a class="btn-small btn-floating waves-effect waves-light"></a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col s12">
+                    <div class="file-field input-field">
+                        <div class="btn waves-effect waves-light"
+                             ng-click="add_list_item('new_judgement_criterion', task_data.judgement_criteria, 'task_data.judgement_criteria', 'task_judgement_criteria', 'task_judgement_criterion_');">
+                            <span>
+                                <i class="material-icons">add</i>
+                            </span>
+                        </div>
+                        <div class="file-path-wrapper">
+                            <!--TODO add submit on enter-->
+                            <input id="new_judgement_criterion" placeholder="New Jugement Criterion" type="text">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Hints-->
+            <div class="row">
+                <div class="col s12">
+                    <div>Hints:</div>
+                    <ul id="task_hints"></ul>
+                </div>
+                <div class="col s12">
+                    <div class="file-field input-field">
+                        <div class="btn waves-effect waves-light" ng-click="add_list_item('new_hint', task_data.hints, 'task_data.hints', 'task_hints', 'task_hint_');">
+                            <span>
+                                <i class="material-icons">add</i>
+                            </span>
+                        </div>
+                        <div class="file-path-wrapper">
+                            <!--TODO add submit on enter-->
+                            <input id="new_hint" placeholder="New Hint" type="text">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--TODO plan exceptions-->
+
             <div class="row">
                 <div class="col s6">
                     <button type="submit" class="col s12 waves-effect waves-green btn-flat">Update</button>
@@ -72,38 +276,233 @@
                 </div>
             </div>
         </form>
+
+        <!--TODO tasks topic in-order rearrange-->
+
     </div>
 <% } else if (action == "create") { %>
-    <!--Create new user-->
-    <h4>Create New User</h4><br>
+    <!--Create new task-->
+    <h4>Create New Task</h4><br>
+    <span ng-init="init_create_new_task_page();"></span>
     <div class="row">
-        <form class="col s12" ng-submit="create_user();">
+        <form class="col s12" ng-submit="create_task(task_data);">
+
+            <!--Task's Title-->
             <div class="row">
                 <div class="input-field col s12">
-                    <input id="username" type="text" class="validate" required="required">
-                    <label for="username">Username</label>
+                    <input id="task_title" ng-model="task_data.title" type="text" class="validate">
+                    <label for="task_title">Task Title</label>
                 </div>
             </div>
+
+            <!--Topic Name selection-->
             <div class="row">
                 <div class="input-field col s12">
-                    <input id="password" type="password" class="validate" required="required">
-                    <label for="password">Password</label>
+                    <select id="task_topic_name" ng-model="task_data.topic_name">
+                        <option value="" disabled selected>Select Topic</option>
+                        <option value="{{topic_data.name}}" ng-repeat="topic_data in topics_list | orderBy: ['-is_active', 'name']">{{topic_data.name}}</option>
+                    </select> <!--Update in js-->
+                    <label for="task_topic_name">Select Topic</label>
                 </div>
             </div>
+
+            <!--Task's Details-->
             <div class="row">
                 <div class="input-field col s12">
-                    <select id="user_role">
-                        <option value="3">Admin</option>
-                        <option value="2">Manger</option>
-                        <option selected value="1">User</option>
-                        <option value="0">Banned</option>
+                    <textarea id="details" ng-model="task_data.details" class="validate materialize-textarea"></textarea>
+                    <label for="details">Details</label>
+                </div>
+            </div>
+
+            <!--Search Keywords-->
+            <div class="row">
+                <div class="col s12">
+                    <div>Search keywords:</div>
+                    <div class="input-field col s12 chips" id="search_keywords"></div>
+                </div>
+            </div>
+
+            <!--Check Point type-->
+            <div class="row">
+                <div class="input-field col s12">
+                    <select id="check_point" ng-model="task_data.check_point">
+                        <option selected value="NONE">None</option>
+                        <option value="SOFT">Soft</option>
+                        <option value="STRONG">Strong</option>
                     </select>
-                    <label for="user_role">Role</label>
+                    <label for="check_point">Check Point</label>
                 </div>
             </div>
+
+            <!--Files Sections-->
+            <div class="row">
+                <div class="col s12" id="files_section">
+                    <div id="file_section_block_0">
+                        <div class="file-field input-field" id="file_section_0">
+                            <div class="btn">
+                                <span>Files</span>
+                                <input type="file" multiple>
+                            </div>
+                            <div class="file-path-wrapper">
+                                <input class="file-path validate" type="text" placeholder="Upload one or more files">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col s12">
+                    <a class="btn-small waves-effect waves-light" ng-click="add_input_row('files_section', 'file', task_data.files);">
+                        Add more files from different directory
+                    </a>
+                </div>
+            </div>
+
+            <!--Codes Sections-->
+            <div class="row">
+                <div class="col s12" id="codes_section">
+                    <div id="code_section_block_0"> <!--Code data block-->
+                        <div class="input-field col s12">
+                            <textarea id="code_section_0" ng-model="task_data.code_sections[0]" class="validate materialize-textarea"></textarea>
+                            <label for="code_section_0">Code Section</label>
+                        </div>
+                        <div class="col s12">
+                            <div>Preview:</div>
+                            <div id="code_section_0_preview"></div>
+                        </div>
+                    </div>
+                </div>
+                <div style="padding-top: 10px;" class="col s12">
+                    <a class="btn-small waves-effect waves-light" ng-click="add_input_row('codes_section', 'code', task_data.code_sections);">
+                        Add code section
+                    </a>
+                </div>
+            </div>
+
+            <!--Answer type-->
+            <div class="row">
+                <div class="input-field col s12">
+                    <select id="answer_type" ng-model="task_data.answer_type" ng-change="change_answer_type();">
+                        <option selected value="TEXT_STRONG">Text (Strong match)</option>
+                        <option value="TEXT_SOFT">Text (Soft match)</option>
+                        <option value="TEXT_FREE">Text (Human check)</option>
+                        <option value="FILES">Files / Videos / Code Files</option>
+                        <option disabled value="COMPILATION_RESULT">Compilation result (code)</option>
+                        <option value="BOOLEAN">Boolean</option>
+                        <option value="MULTIPLE_CHOICES">Multiple Choices</option>
+                    </select>
+                    <label for="answer_type">Answer Type</label>
+                </div>
+            </div>
+
+            <!--BOOLEAN / MULTIPLE_CHOICES answer-->
+            <div ng-show="task_data.answer_type == 'BOOLEAN' || task_data.answer_type == 'MULTIPLE_CHOICES'" class="row">
+                <div class="col s12">
+                    <div>Answer Options:</div>
+                    <ul id="task_answer_boolean_options">
+                        <li class="row" id="task_answer_boolean_option_0">
+                            <div class="col s6 m6 l4" ng-class="{'green': task_data.answer.includes(task_data.answer_options[0])}">
+                                {{task_data.answer_options[0]}}
+                            </div>
+                            <div class="col s2 m1">
+                                <a class="btn-small btn-floating waves-effect waves-light" ng-click="edit_list_item(task_data.answer_options, 0);">
+                                    <i class="material-icons">edit</i>
+                                </a>
+                            </div>
+                            <div class="col s2 m1">
+                                <a class="btn-small btn-floating waves-effect waves-light" ng-click="delete_list_item(task_data.answer_options, 0, 'task_answer_boolean_option_');">
+                                    <i class="material-icons">delete</i>
+                                </a>
+                            </div>
+                            <div class="col s2 m4 l6">
+                                <div style="display: inline-flex; vertical-align: middle;" ng-class="[
+                                            {'green-text': task_data.answer.includes(task_data.answer_options[0])},
+                                            {'grey-text': !task_data.answer.includes(task_data.answer_options[0])}
+                                        ]"
+                                     ng-click="toggle_boolean_answer_selection(task_data.answer_options[0]);">
+                                    <i class="material-icons">done</i>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col s12">
+                    <div class="file-field input-field">
+                        <div class="btn waves-effect waves-light" ng-click="add_new_boolean_option();">
+                            <span>
+                                <i class="material-icons">add</i>
+                            </span>
+                        </div>
+                        <div class="file-path-wrapper">
+                            <!--TODO add submit on enter-->
+                            <input id="new_boolean_option" placeholder="New Option" ng-model="new_boolean_option" type="text">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--TEXT_STRONG answer-->
+            <div ng-show="task_data.answer_type == 'TEXT_STRONG'" class="row">
+                <div class="input-field col s12">
+                    <input id="task_text_strong_answer" ng-model="task_data.answer[0]" type="text" class="validate">
+                    <label for="task_text_strong_answer">Answer</label>
+                </div>
+            </div>
+
+            <!--TEXT_SOFT answer-->
+            <div ng-show="task_data.answer_type == 'TEXT_SOFT'"  class="row">
+                <div class="col s12">
+                    <div>Answer:</div>
+                    <div class="input-field col s12 chips" id="task_text_soft_answer"></div>
+                </div>
+            </div>
+
+            <!--Judgement Criteria-->
+            <div class="row">
+                <div class="col s12">
+                    <div>Judgement Criteria:</div>
+                    <ul id="task_judgement_criteria"></ul>
+                </div>
+                <div class="col s12">
+                    <div class="file-field input-field">
+                        <div class="btn waves-effect waves-light"
+                             ng-click="add_list_item('new_judgement_criterion', task_data.judgement_criteria, 'task_data.judgement_criteria', 'task_judgement_criteria', 'task_judgement_criterion_');">
+                            <span>
+                                <i class="material-icons">add</i>
+                            </span>
+                        </div>
+                        <div class="file-path-wrapper">
+                            <!--TODO add submit on enter-->
+                            <input id="new_judgement_criterion" placeholder="New Jugement Criterion" type="text">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Hints-->
+            <div class="row">
+                <div class="col s12">
+                    <div>Hints:</div>
+                    <ul id="task_hints"></ul>
+                </div>
+                <div class="col s12">
+                    <div class="file-field input-field">
+                        <div class="btn waves-effect waves-light" ng-click="add_list_item('new_hint', task_data.hints, 'task_data.hints', 'task_hints', 'task_hint_');">
+                            <span>
+                                <i class="material-icons">add</i>
+                            </span>
+                        </div>
+                        <div class="file-path-wrapper">
+                            <!--TODO add submit on enter-->
+                            <input id="new_hint" placeholder="New Hint" type="text">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--TODO plan exceptions-->
+
             <div class="row">
                 <div class="col s6">
-                    <button type="submit" class="col s12 waves-effect waves-green btn-flat">Create user</button>
+                    <button type="submit" class="col s12 waves-effect waves-green btn-flat">Create</button>
                 </div>
                 <div class="col s6">
                     <button type="reset" ng-click="back_to_parent_category();" class="col s12 waves-effect waves-red btn-flat">Cancel</button>

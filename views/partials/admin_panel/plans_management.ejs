@@ -1,5 +1,5 @@
 <% if (typeof action === 'undefined') { %>
-    <!--Show all users list-->
+    <!--Show plans list-->
     <span ng-init="get_all_plans();"></span>
     <ul class="collapsible popout">
         <li ng-repeat="plan_data in plans_list | orderBy: ['-is_active', 'name']">
@@ -52,7 +52,7 @@
         </div>
     </div>
 <% } else if (action == "view" && typeof plan_name_for_details !== "undefined") { %>
-    <!--Show specific user details-->
+    <!--Show specific plan details-->
     <div ng-init="get_plan_details('<%= plan_name_for_details %>');">
         <h4>{{original_plan_name}}</h4><br>
         <form ng-submit="modify_plan(original_plan_name, plan_data);">

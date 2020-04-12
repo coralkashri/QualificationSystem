@@ -10,8 +10,10 @@ angular.module("adminTopicsM", [])
             _preloader = preloader;
             _modals = modals_manager;
 
-            $scope.get_all_topics = (cb) => {
+            $scope.get_all_topics = () => {
+                let deferred = $.Deferred();
                 _preloader.start();
+
                 _$http({
                     method: "GET",
                     url: "/api/topics",
@@ -31,18 +33,20 @@ angular.module("adminTopicsM", [])
                         _$scope.topics_list = new_topics_list;
                         _preloader.stop();
                     }
-                    cb && cb(new_topics_list);
+                    deferred.resolve("Success");
                 }, (response) => {
                     response = response.data;
                     alertify.error(response.message);
                     _preloader.stop();
+                    deferred.reject("Failed");
                 });
+                return deferred.promise();
             };
             
             _$scope.create_topic = (topic_data) => {
                 let params = $.param({
                     description: topic_data.description,
-                    dependencies: topic_data.get_dependencies_topics().toString(),
+                    dependencies: JSON.stringify(topic_data.get_dependencies_topics()),
                     active_status: !!topic_data.is_active
                 });
                 _$http({
@@ -64,7 +68,7 @@ angular.module("adminTopicsM", [])
                 let params = $.param({
                     new_topic_name: topic_data.name,
                     new_topic_description: topic_data.description,
-                    new_topic_dependencies: topic_data.get_dependencies_topics().toString(),
+                    new_topic_dependencies: JSON.stringify(topic_data.get_dependencies_topics()),
                     new_topic_active_status: !!topic_data.is_active
                 });
                 _$http({

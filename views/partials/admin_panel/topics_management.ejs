@@ -1,7 +1,7 @@
 <span ng-init="init_topics_page();"></span>
 
 <% if (typeof action === 'undefined') { %>
-    <!--Show all users list-->
+    <!--Show topics list-->
     <span ng-init="get_all_topics();"></span>
     <ul class="collapsible popout">
         <li ng-repeat="topic_data in topics_list | orderBy: ['-is_active', 'name']">
@@ -54,7 +54,7 @@
         </div>
     </div>
 <% } else if (action == "view" && typeof topic_name_for_details !== "undefined") { %>
-    <!--Show specific user details-->
+    <!--Show specific topic details-->
     <div ng-init="get_topic_details('<%= topic_name_for_details %>');">
         <h4>{{original_topic_name}}</h4><br>
         <form ng-submit="modify_topic(original_topic_name, topic_data);">

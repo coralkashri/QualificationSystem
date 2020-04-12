@@ -25,6 +25,8 @@ let is_topic_exists = async (req, res, next) => {
     return query_res.length > 0;
 };
 
+exports.is_topic_exists = is_topic_exists;
+
 /**
  *
  * @param req
@@ -39,8 +41,10 @@ let get_topic_id = async (req, res, next) => {
     let topics_db_model = database.topics_model();
     let topic_name = requests_handler.require_param(req, "get", "topic_name");
     let query_res = await topics_db_model.find({name: topic_name}, "_id").exec();
-    return query_res[0]; // TODO check this result
+    return query_res[0]._id; // TODO check this result
 };
+
+exports.get_topic_id = get_topic_id;
 
 exports.get = async (req, res, next) => {
     // Get DB
@@ -159,6 +163,3 @@ exports.remove = async (req, res, next) => {
 
     // TODO delete as well all topic related tasks
 };
-
-exports.get_topic_id = get_topic_id;
-exports.is_topic_exists = is_topic_exists;

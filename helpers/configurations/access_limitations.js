@@ -2,6 +2,7 @@ exports.min_access_required = {
     view_projects: 1,
     view_profile: 1,
     modify_current_user: 1,
+    upload_files: 1,
     view_admin_panel: 2,
     view_users_details: 2,
     create_new_user_with_specific_role: 2,
