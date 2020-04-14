@@ -85,7 +85,7 @@ exports.view_plan_page = async (req, res, next) => {
         if (is_plan_viewable) {
             let is_plan_accessible = await users_model.is_plan_accessible_by_user(data, {}, {});
 
-            res.render("pages/plans", {
+            res.render("pages/view_plan", {
                 access_level: req.user ? req.session.user.role : 1,
                 is_logged_in: true,
                 username: req.session.user && req.session.user.username,

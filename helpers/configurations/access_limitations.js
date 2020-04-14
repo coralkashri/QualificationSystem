@@ -23,8 +23,8 @@ exports.min_access_required = {
     delete_plans: 2,
     archive_plans: 2,
     view_archived_plans: 2,
-    watch_unregistered_plans: 2
-    // TODO skip plan tasks access
+    watch_unregistered_plans: 2,
+    skip_tasks: 2
 };
 
 exports.roles = {

@@ -165,10 +165,16 @@ angular.module("adminTasksM", [])
                 });
             };
 
-            _$scope.reorder_task = (task_id, new_inner_topic_order) => {
-                let params = $.param({
-                    inner_topic_order: new_inner_topic_order
-                });
+            _$scope.reorder_task = (task_id, new_inner_topic_order, new_topic_name) => {
+                let deferred = $.Deferred();
+                let pre_params = {};
+                if (new_inner_topic_order) {
+                    pre_params.inner_topic_order = new_inner_topic_order;
+                }
+                if (new_topic_name) {
+                    pre_params.topic_name = new_topic_name;
+                }
+                let params = $.param(pre_params);
                 _$http({
                     method: "POST",
                     url: "/api/tasks/modify/" + task_id,
@@ -178,10 +184,13 @@ angular.module("adminTasksM", [])
                     response = response.data;
                     alertify.success("task successfully archived.");
                     _$scope.get_all_tasks();
+                    deferred.resolve("Success");
                 }, (response) => {
                     response = response.data;
                     alertify.error(response.message);
+                    deferred.reject("Failed");
                 });
+                return deferred.promise();
             };
 
             _$scope.change_task_topic = (task_id, new_topic_name) => {

@@ -1,0 +1,40 @@
+<!--Show specific topic details-->
+<div ng-init="get_topic_details('<%= topic_name_for_details %>');">
+    <h4>{{original_topic_name}}</h4><br>
+    <form ng-submit="modify_topic(original_topic_name, topic_data);">
+        <div class="row">
+            <div class="input-field col s12">
+                <input id="topic_name" ng-model="topic_data.name" type="text" class="validate">
+                <label for="topic_name">Topic Name</label>
+            </div>
+        </div>
+
+        <label>
+            <input ng-model="topic_data.is_active" type="checkbox" />
+            <span>Active</span>
+        </label><br><br>
+
+        <div class="row">
+            <div class="input-field col s12">
+                <textarea id="description" ng-model="topic_data.description" class="validate materialize-textarea"></textarea>
+                <label for="description">Description</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-field col s12 chips" id="dependencies_topics"></div>
+        </div>
+
+        <div class="row">
+            <div class="col s6">
+                <button type="submit" class="col s12 waves-effect waves-green btn-flat">Update</button>
+            </div>
+            <div class="col s6">
+                <button type="reset" ng-click="back_to_parent_category();" class="col s12 waves-effect waves-red btn-flat">Cancel</button>
+            </div>
+        </div>
+    </form>
+
+    <!--TODO tasks topic in-order rearrange-->
+
+</div>

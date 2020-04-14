@@ -5,19 +5,11 @@
     <% include ../partials/global/basic_head.ejs %>
     <script type="text/javascript" src="/js/services/users.js"></script>
     <script type="text/javascript" src="/js/pages/plans.js"></script>
-    <% if (typeof plan_name != "undefined") { %>
-        <title><%=plan_name%> Qualification Plan</title>
-    <% } else { %>
-        <title>Qualification System - Plans</title>
-    <% } %>
+    <title>Qualification System - Plans</title>
 </head>
 
 <body class="rtl" ng-controller="body_controller">
-<% if (typeof plan_name != "undefined") { %>
-    <%- include('../partials/global/nav', {page: 'view_plan', page_view_name: plan_name});%>
-<% } else { %>
     <%- include('../partials/global/nav', {page: 'plans', page_view_name: 'Plans'});%>
-<% } %>
 <div id="page_content">
     <br><br><br><br>
     <div class="row">
@@ -25,62 +17,62 @@
         </div>
     </div>
     <div class="row" style="margin: 0 auto; display: flex;">
-        <% if (typeof plan_name != "undefined") { %>
-            <span ng-init="get_plan_details('<%=plan_name%>');"></span>
-        <% } else { %>
-            <% if (plans_group === "all") { %>
-                <sapn ng-init="get_all_plans('<%=username%>');"></sapn>
-            <% } else if (plans_group === "registered") {%>
-                <sapn ng-init="get_user_plans('<%=view_user%>');"></sapn>
-            <% } %>
-            <div class="col s12">
-                <ul class="collapsible popout">
-                    <li ng-repeat="plan_data in plans_list | orderBy: ['-is_active', 'name']">
-                        <div class="collapsible-header" ng-class="{grey: !plan_data.is_active}">{{plan_data.name}}</div>
+        <% if (plans_group === "all") { %>
+            <!--View All Available Plans-->
+            <sapn ng-init="get_all_plans('<%=username%>');"></sapn>
 
-                        <div class="collapsible-body">
-                            <div ng-if="!plan_data.is_active">
-                                <div class="valign-wrapper flash flash-warn" style="width: 100%;">
-                                    <i class="material-icons" style="padding-right: 5px;">warning</i>
-                                    This plan is currently inactive.
-                                </div>
-                            </div>
-                            <div>{{plan_data.description}}</div>
-                            <div class="collapsible-footer">
-                                <% if (access_level >= min_access_required.view_admin_panel) { %>
-                                    <a class="btn-small waves-effect waves-light"
-                                       href="/view/admin-panel/plans-management/p{{plan_data.name}}"
-                                       title="Management">
-                                        <i class="material-icons">settings</i>
-                                    </a>
-                                <% } %>
-                                <% if (access_level >= min_access_required.watch_unregistered_plans) { %>
-                                    <a ng-if="!plan_data.is_registered"
-                                       class="btn-small waves-effect waves-light"
-                                       href="/view/plans/{{plan_data.name}}"
-                                       title="Watch Plan">
-                                        <i class="material-icons">visibility</i>
-                                    </a>
-                                <% } %>
-                                <a ng-if="plan_data.is_registered"
-                                   class="btn-small waves-effect waves-light"
-                                   href="/view/plans/{{plan_data.name}}"
-                                   title="Continue">
-                                    <!--<i class="material-icons">forward</i>-->
-                                    <i class="material-icons">directions_walk</i>
-                                </a>
-                                <a ng-if="!plan_data.is_registered"
-                                   class="btn-small waves-effect waves-light"
-                                   ng-click="register_and_begin_plan('<%=username%>', plan_data.name)"
-                                   title="Register">
-                                    Register
-                                </a>
+        <% } else if (plans_group === "registered") {%>
+            <!--View Self Plans-->
+            <sapn ng-init="get_user_plans('<%=view_user%>');"></sapn>
+        <% } %>
+
+        <div class="col s12">
+            <ul class="collapsible popout">
+                <li ng-repeat="plan_data in plans_list | orderBy: ['-is_active', 'name']">
+                    <div class="collapsible-header" ng-class="{grey: !plan_data.is_active}">{{plan_data.name}}</div>
+
+                    <div class="collapsible-body">
+                        <div ng-if="!plan_data.is_active">
+                            <div class="valign-wrapper flash flash-warn" style="width: 100%;">
+                                <i class="material-icons" style="padding-right: 5px;">warning</i>
+                                This plan is currently inactive.
                             </div>
                         </div>
-                    </li>
-                </ul>
-            </div>
-        <% } %>
+                        <div>{{plan_data.description}}</div>
+                        <div class="collapsible-footer">
+                            <% if (access_level >= min_access_required.view_admin_panel) { %>
+                                <a class="btn-small waves-effect waves-light"
+                                   href="/view/admin-panel/plans-management/p{{plan_data.name}}"
+                                   title="Management">
+                                    <i class="material-icons">settings</i>
+                                </a>
+                            <% } %>
+                            <% if (access_level >= min_access_required.watch_unregistered_plans) { %>
+                                <a ng-if="!plan_data.is_registered"
+                                   class="btn-small waves-effect waves-light"
+                                   href="/view/plans/{{plan_data.name}}"
+                                   title="Watch Plan">
+                                    <i class="material-icons">visibility</i>
+                                </a>
+                            <% } %>
+                            <a ng-if="plan_data.is_registered"
+                               class="btn-small waves-effect waves-light"
+                               href="/view/plans/{{plan_data.name}}"
+                               title="Continue">
+                                <!--<i class="material-icons">forward</i>-->
+                                <i class="material-icons">directions_walk</i>
+                            </a>
+                            <a ng-if="!plan_data.is_registered"
+                               class="btn-small waves-effect waves-light"
+                               ng-click="register_and_begin_plan('<%=username%>', plan_data.name)"
+                               title="Register">
+                                Register
+                            </a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
 

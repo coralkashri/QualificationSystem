@@ -21,6 +21,13 @@ angular.module("adminTopicsM", [])
                 }).then((response) => {
                     response = response.data;
                     let new_topics_list = response.data;
+                    new_topics_list.data = {};
+
+                    // Easy access to topic name by topic id
+                    for (let i = 0; i < new_topics_list.length; i++) {
+                        new_topics_list.data[new_topics_list[i]._id] = new_topics_list[i].name;
+                    }
+
                     if (_$scope.topics_list) {
                         _$scope.topics_list.splice(0, _$scope.topics_list.length); // Clear this array
                         timers_manager.add_timer("update_topics_list", _ => {
@@ -39,29 +46,6 @@ angular.module("adminTopicsM", [])
                     alertify.error(response.message);
                     _preloader.stop();
                     deferred.reject("Failed");
-                });
-                return deferred.promise();
-            };
-
-            $scope.get_topic_by_id = (topic_id) => {
-                let deferred = $.Deferred();
-                _preloader.start();
-
-                _$http({
-                    method: "GET",
-                    url: "/api/topics/id" + topic_id,
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
-                }).then((response) => {
-                    response = response.data;
-                    alertify.success(response.message);
-                    _$scope.topic_data = response.data[0];
-                    deferred.resolve(_$scope.topic_data);
-                }, (response) => {
-                    response = response.data;
-                    alertify.error(response.message);
-                    deferred.reject("Failed");
-                }).finally(() => {
-                    _preloader.stop();
                 });
                 return deferred.promise();
             };

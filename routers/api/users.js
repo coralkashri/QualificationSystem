@@ -42,6 +42,13 @@ router.get("/u:username/registered-plans", (req, res, next) => {
     next();
 }, con_validator.require_access_level, users_controller.get_registered_plans);
 
+router.get("/u:username/plan-progress/:plan_name", (req, res, next) => {
+    req.required_level = access_limitations.min_access_required.view_profile;
+    req.action_on_reject = _ => {
+        res.redirect('/403');
+    };
+    next();
+}, con_validator.require_access_level, users_controller.get_registered_plans);
 
 // POST routes
 

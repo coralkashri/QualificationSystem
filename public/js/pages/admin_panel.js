@@ -2,15 +2,17 @@ angular.element(document).ready(() => {
     init_materialize();
 });
 
-const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 'timersM', 'modalsM', 'plansM', 'adminUsersM', 'adminPlansM', 'adminTopicsM', 'adminTasksM'])
+const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 'timersM', 'modalsM', 'plansM',
+    'topicsM', 'adminUsersM', 'adminPlansM', 'adminTopicsM', 'adminTasksM'])
 
     .controller('body_controller', ($scope, $http, $window, $interval, $timeout, $location, $compile, preloader, dark_area,
-                                    timers_manager_s, modals_s, plans_s, admin_users_s, admin_plans_s, admin_topics_s,
-                                    admin_tasks_s) => {
+                                    timers_manager_s, modals_s, plans_s, topics_s, admin_users_s, admin_plans_s,
+                                    admin_topics_s, admin_tasks_s) => {
         ng_init_sidenav(dark_area);
         modals_s.init($scope, preloader, dark_area);
         timers_manager_s.init($scope, $http, $timeout, preloader);
         plans_s.init($scope, $http, timers_manager_s, preloader);
+        topics_s.init($scope, $http, timers_manager_s, preloader);
         admin_users_s.init($scope, $http, preloader);
         admin_plans_s.init($scope, $http, timers_manager_s, modals_s, preloader);
         admin_topics_s.init($scope, $http, timers_manager_s, modals_s, preloader);
@@ -361,7 +363,102 @@ const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 
 
             // View tasks page
             $scope.init_view_tasks_page = () => {
+                /*let exist_topics = {
+                    topics_list: [],
+                    first_tasks: []
+                };
 
+                $scope.validate_and_update_if_topic_already_exists = (topic_id, task_id) => {
+                    if (!exist_topics.topics_list.includes(topic_id)) {
+                        exist_topics.topics_list.push(topic_id);
+                        exist_topics.first_tasks.push(task_id);
+                        return false;
+                    } else if (exist_topics.first_tasks.includes(task_id)) {
+                        return false;
+                    }
+                    return true;
+                };*/
+
+                let draggable_elements;
+
+                // Set draggable events
+                function handleDragStart(e) {
+                    this.style.opacity = '0.4';  // this / e.target is the source node.
+
+                    e.dataTransfer.effectAllowed = 'move';
+                    let transfer_data = {
+                        inner_topic_order: this.attributes.inner_topic_order.value,
+                        topic_id: this.attributes.topic_id.value,
+                        task_id: this.attributes.task_id.value
+                    };
+                    e.dataTransfer.setData('text/plain', JSON.stringify(transfer_data));
+                }
+
+                function handleDragOver(e) {
+                    if (e.preventDefault) {
+                        e.preventDefault(); // Necessary. Allows us to drop.
+                    }
+
+                    e.dataTransfer.dropEffect = 'move';  // See the section on the DataTransfer object.
+
+                    return false;
+                }
+
+                function handleDragEnter(e) {
+                    // this / e.target is the current hover target.
+                    this.classList.add('dragover');
+                }
+
+                function handleDragLeave(e) {
+                    this.classList.remove('dragover');  // this / e.target is previous target element.
+                }
+
+                function handleDrop(e) {
+                    // this / e.target is current target element.
+
+                    if (e.stopPropagation) {
+                        e.stopPropagation(); // stops the browser from redirecting.
+                    }
+
+                    // See the section on the DataTransfer object.
+
+                    let data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                    $scope.reorder_task(data.task_id, this.attributes.inner_topic_order.value, $scope.topics_list.data[this.attributes.topic_id.value]).done(() => {
+                        set_events();
+                    });
+
+                    return false;
+                }
+
+                function handleDragEnd(e) {
+                    // this/e.target is the source node.
+
+                    [].forEach.call(draggable_elements, function (elem) {
+                        elem.classList.remove('dragover');
+                    });
+                }
+
+                let set_events = () => {
+                    preloader.start();
+                    $timeout(() => {
+                        draggable_elements = document.querySelectorAll("[draggable='true']");
+                        [].forEach.call(draggable_elements, function(elem) {
+                            elem.addEventListener('dragstart', handleDragStart, false);
+                            elem.addEventListener('dragenter', handleDragEnter, false);
+                            elem.addEventListener('dragover', handleDragOver, false);
+                            elem.addEventListener('dragleave', handleDragLeave, false);
+                            elem.addEventListener('drop', handleDrop, false);
+                            elem.addEventListener('dragend', handleDragEnd, false);
+                        });
+                        preloader.stop();
+                    }, 2000);
+                };
+
+                $scope.get_all_tasks().done(() => {
+                    $scope.get_all_topics().done(() => {
+                        set_events();
+                    });
+                });
             };
 
             // Modify task page

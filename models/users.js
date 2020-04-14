@@ -6,6 +6,7 @@ let database = require('../helpers/db_controllers/services/db').getDB();
 let requests_handler = require('../helpers/requests_handler');
 const access_limitations = require('../helpers/configurations/access_limitations');
 let plans_model = require('./plans');
+let tasks_model = require('./tasks');
 
 // Value extract / calculate functions
 
@@ -142,6 +143,14 @@ let is_plan_viewable_by_user = async (req, res, next) => {
 
 exports.is_plan_viewable_by_user = is_plan_viewable_by_user;
 
+/**
+ * @param req
+ * (require) req["query"]["username"] - Target user
+ * (require) req["query"]["plan_name"] - Check for plan
+ * (optional) req["query"]["user_role"]
+ *
+ * @returns true if the user is able to register to target plan, else false.
+ */
 let is_plan_registrable_by_user = async (req, res, next) => {
     let role = requests_handler.optional_param(req, "get", "user_role");
 
@@ -178,7 +187,7 @@ let is_user_registered_to_plan = async (req, res, next) => {
     try {
         let query = {
             username: username,
-            "plans.id": await plans_model.get_plan_id({query: {plan_name}})
+            "plans.id": await plans_model.get_plan_id(req, res, next)
         };
         let query_res = await users_db_model.find(query).exec();
         is_register = query_res.length > 0;
@@ -192,6 +201,67 @@ exports.is_user_registered_to_plan = is_user_registered_to_plan;
 
 
 // API
+
+exports.get_plan_progress = async (req, res, next) => {
+    // Get DB
+    let users_db_model = database.users_model();
+
+    // Extract param
+    let username = requests_handler.require_param(req, "route", "username");
+    let target_plan = requests_handler.optional_param(req, "route", "plan_name");
+
+    // Prepare params for future access
+    req.query.username = req.params.username;
+    req.query.plan_name = req.params.plan_name;
+
+    // Validation
+    if (req.user && req.user.role < access_limitations.min_access_required.view_users_details && req.user.username !== username) {
+        throw new Error("You have no permission to watch this user.");
+    }
+
+    let is_registered = await is_user_registered_to_plan(req, res, next);
+    assert.ok(is_registered, "User does not registered to this plan.");
+
+    // Arrange data
+    let query = {};
+    query.username = username;
+    let plan_details = await plans_model.get(req, res, next);
+    plan_details = plan_details[0];
+    let user_data = await users_db_model.find(query, '-password').exec();
+    let target_plan_id = plan_details._id;
+    req.query.plan_id = target_plan_id; // Used inside the loop in the call for tasks_model.get_task_plan_exceptions
+
+    let plan_route = plan_details.route;
+    let user_plan = user_data.plans.filter((plan) => plan.id === target_plan_id)[0];
+
+    let current_user_task_id = user_plan.current_task.id;
+    let is_user_completed_current_task = true; // Inside the loop, indicates if the current checked task is already completed by this user.
+
+    let progress;
+    let current_user_plan_progress_value; // TODO consider to save in the DB to save time
+    let total_plan_progress_value; // TODO consider to save in the DB to save time
+
+    current_user_plan_progress_value = total_plan_progress_value = 0;
+    for (let i = 0; i < plan_route.length; i++) {
+        let task_id = plan_route[i];
+        let task_value;
+        let plan_exceptions = await tasks_model.get_task_plan_exceptions(req, res, next);
+        if (!plan_exceptions) {
+            task_value = 1;
+        } else {
+            task_value = plan_exceptions.task_progress_value || 1;
+        }
+        if (current_user_task_id === task_id) {
+            is_user_completed_current_task = false;
+        }
+        if (is_user_completed_current_task) {
+            current_user_plan_progress_value += task_value;
+        }
+        total_plan_progress_value += task_value;
+    }
+    progress = current_user_plan_progress_value / total_plan_progress_value;
+    return progress;
+};
 
 exports.get = async (req, res, next) => {
     // Get DB

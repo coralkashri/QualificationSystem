@@ -9,21 +9,6 @@ const access_limitations = require('../helpers/configurations/access_limitations
 
 /**
  * @param req
- * req["query"]["task_id"] - Task id
- *
- * @returns true if exists, else false.
- */
-let is_task_exists = async (req, res, next) => {
-    let tasks_db_model = database.tasks_model();
-    let task_id = requests_handler.require_param(req, "get", "task_id");
-    let query_res = await tasks_db_model.find({_id: task_id}).exec();
-    return query_res.length > 0;
-};
-
-exports.is_task_exists = is_task_exists;
-
-/**
- * @param req
  * req["query"]["topic_id"] - Topic id
  *
  * @returns Number of tasks related to specific topic
@@ -77,27 +62,32 @@ let rearrange_task_within_topic = async (task_id, new_topic_id, new_task_place) 
     let new_task_inner_topic_order = await get_legal_inner_order_within_topic(topic_id, new_task_place);
 
     let filter, update = {};
-    if (new_task_inner_topic_order === new_task_place) {
+    if (new_task_inner_topic_order === Number(new_task_place)) {
         filter = {
-            topic_id: new_topic_id,
+            topic_id: topic_id,
             inner_topic_order: {
                 $gte: new_task_inner_topic_order
             }
         };
-        update["$inc"] = {
-            inner_topic_order: 1
+        update = {
+            $inc: {
+                inner_topic_order: 1
+            }
         };
-    } else {
-        filter = {
-            _id: task_id
-        };
+        await tasks_db_model.updateMany(filter, update).exec();
     }
-    update["$set"] = {
-        inner_topic_order: new_task_inner_topic_order
+    filter = {
+        _id: task_id
     };
-    await tasks_db_model.update(filter, update).exec();
+    update = {
+        $set: {
+            inner_topic_order: new_task_inner_topic_order
+        }
+    };
+    await tasks_db_model.updateOne(filter, update).exec();
 };
 
+// Decrease all previous topic's tasks inner order, that were after the current updated task
 let fix_popout_tasks_order_within_topic = async (task_id) => {
     let tasks_db_model = database.tasks_model();
 
@@ -116,16 +106,71 @@ let fix_popout_tasks_order_within_topic = async (task_id) => {
             inner_topic_order: -1
         }
     };
-    await tasks_db_model.update(filter, update).exec();
+    await tasks_db_model.updateMany(filter, update).exec();
 };
+
+/**
+ * @param req
+ * req["query"]["task_id"] - Task id
+ *
+ * @returns true if exists, else false.
+ */
+let is_task_exists = async (req, res, next) => {
+    let tasks_db_model = database.tasks_model();
+    let task_id = requests_handler.require_param(req, "get", "task_id");
+    let query_res = await tasks_db_model.find({_id: task_id}).exec();
+    return query_res.length > 0;
+};
+
+exports.is_task_exists = is_task_exists;
+
+/**
+ *
+ * @param req
+ * req["query"]["task_id"]
+ * req["query"]["plan_id"]
+ *
+ * @returns Get the exceptions in the target task to the target plan.
+ * If there are exceptions for this plan - return the struct.
+ * Else return undefined.
+ *
+ * @throws assert exception if the task not found.
+ */
+let get_task_plan_exceptions = async (req, res, next) => {
+    // Pre Validation
+    assert.ok(await is_task_exists(req, res, next), "Task not found.");
+
+    // Get DB
+    let tasks_db_model = database.tasks_model();
+
+    // Get params
+    let target_task = requests_handler.require_param(req, "get","task_id");
+    let target_plan = requests_handler.require_param(req, "get","plan_id");
+
+    // Prepare query
+    let query = {
+        _id: target_task
+    };
+
+    // Perform action
+    let task = await tasks_db_model.find(query).exec();
+    task = task[0];
+    let plan_exceptions = task.plan_exceptions;
+    let target_plan_exceptions = plan_exceptions.filter(plan => plan.id === target_plan);
+    return target_plan_exceptions.length ? target_plan_exceptions[0] : undefined;
+};
+
+exports.get_task_plan_exceptions = get_task_plan_exceptions;
+
+
+// API Routes
 
 exports.get = async (req, res, next) => {
     // Get DB
     let tasks_db_model = database.tasks_model();
 
     // Get params
-    let target_task;
-    target_task = requests_handler.optional_param(req, "route","task_id");
+    let target_task = requests_handler.optional_param(req, "route","task_id");
 
     // Prepare query
     let query;
@@ -251,9 +296,6 @@ exports.modify = async (req, res, next) => {
     if (topic_name) {
         topic_id = await topics_model.get_topic_id({query: {topic_name: topic_name}}, {}, {}); // TODO check this output
         is_topic_changed = await is_task_topic_changed(target_task, topic_id);
-
-        // Decrease all previous topic's tasks inner order, that were after the current updated task
-        await fix_popout_tasks_order_within_topic(target_task);
     }
 
     if (task_inner_topic_order) {
@@ -262,8 +304,10 @@ exports.modify = async (req, res, next) => {
 
     // Pre Validations / Pre Process
     if (is_inner_order_changed) {
+        await fix_popout_tasks_order_within_topic(target_task);
         await rearrange_task_within_topic(target_task, topic_id, task_inner_topic_order);
     } else if (is_topic_changed) {
+        await fix_popout_tasks_order_within_topic(target_task);
         task_inner_topic_order = await get_new_place_order_in_topic(topic_id);
     }
 
@@ -313,6 +357,7 @@ exports.remove = async (req, res, next) => {
     let task_exists = await is_task_exists({ query: { task_id: target_task } });
     assert.ok(task_exists, "Task not found."); // If not exist, throw error
 
+    await fix_popout_tasks_order_within_topic(target_task);
     // TODO remove related files from db
 
     // Perform action

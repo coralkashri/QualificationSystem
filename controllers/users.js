@@ -50,6 +50,15 @@ exports.is_plan_registrable_by_user = is_plan_registrable_by_user;
 
 // Routing functions
 
+exports.get_plan_progress = async (req, res, next) => {
+    try {
+        let progress = await users_model.get_plan_progress(req, res, next);
+        return responses_gen.generate_response(res, 200, progress, "Progress successfully restored");
+    } catch (e) {
+        return responses_gen.generate_response(res, 400, null, e.message);
+    }
+};
+
 exports.get_available_plans = async (req, res, next) => {
     try {
         assert.ok(!!req.session.user, "User disconnected, please login.");

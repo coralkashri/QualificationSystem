@@ -1,0 +1,52 @@
+<!--Show topics list-->
+<span ng-init="get_all_topics();"></span>
+<ul class="collapsible popout">
+    <li ng-repeat="topic_data in topics_list | orderBy: ['-is_active', 'name']">
+        <div class="collapsible-header" ng-class="{grey: !topic_data.is_active}">{{topic_data.name}}</div>
+
+        <div class="collapsible-body">
+            <div ng-if="!topic_data.is_active">
+                <div class="valign-wrapper flash flash-warn" style="width: 100%;">
+                    <i class="material-icons" style="padding-right: 5px;">warning</i>
+                    This topic is currently inactive.
+                </div>
+            </div>
+            <div>{{topic_data.description}}</div>
+        </div>
+
+        <div class="collapsible-footer">
+            <a class="btn-small waves-effect waves-light"
+               href="/view/admin-panel/topics-management/t{{topic_data.name}}"
+               title="Management">
+                <i class="material-icons">settings</i>
+            </a>
+
+            <a ng-if="topic_data.is_active"
+               class="btn-small waves-effect waves-light"
+               ng-click="archive_topic(topic_data.name);"
+               title="Archive">
+                <i class="material-icons">archive</i>
+            </a>
+
+            <a ng-if="!topic_data.is_active"
+               class="btn-small waves-effect waves-light"
+               ng-click="reactivate_topic(topic_data.name);"
+               title="Reactivate">
+                <i class="material-icons">unarchive</i>
+            </a>
+
+            <a class="btn-small waves-effect waves-light"
+               ng-click="delete_topic(topic_data.name);"
+               title="Delete">
+                <i class="material-icons">delete</i>
+            </a>
+        </div>
+    </li>
+</ul>
+<div class="row">
+    <div class="col s12 m4">
+        <a class="btn-small btn-floating waves-effect waves-light" href="/view/admin-panel/topics-management/new-topic">
+            <i class="material-icons">add</i>
+        </a>
+    </div>
+</div>

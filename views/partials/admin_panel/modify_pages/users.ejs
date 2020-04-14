@@ -1,0 +1,37 @@
+<!--Show specific user details-->
+<div ng-init="get_user_details('<%= username_for_details %>')">
+    <h4>{{user_data.username}}</h4><br>
+    <form ng-submit="modify_user(user_data.username);">
+        <div class="row">
+            <div class="input-field col s12">
+                <input id="username" type="text" class="validate">
+                <label for="username">Username</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s12">
+                <input id="password" type="password" class="validate">
+                <label for="password">Password</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s12">
+                <select id="user_role">
+                    <option value="3">Admin</option>
+                    <option value="2">Manger</option>
+                    <option value="1">User</option>
+                    <option value="0">Banned</option>
+                </select>
+                <label for="user_role">Role</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s6">
+                <button type="submit" class="col s12 waves-effect waves-green btn-flat">Update</button>
+            </div>
+            <div class="col s6">
+                <button type="reset" ng-click="back_to_parent_category();" class="col s12 waves-effect waves-red btn-flat">Cancel</button>
+            </div>
+        </div>
+    </form>
+</div>

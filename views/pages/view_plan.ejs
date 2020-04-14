@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="global_app" ng-cloak>
+
+<head>
+    <% include ../partials/global/basic_head.ejs %>
+    <script type="text/javascript" src="/js/services/users.js"></script>
+    <script type="text/javascript" src="/js/pages/plans.js"></script>
+    <title><%=plan_name%> Qualification Plan</title>
+</head>
+
+<body class="rtl" ng-controller="body_controller">
+<%- include('../partials/global/nav', {page: 'view_plan', page_view_name: plan_name});%>
+<div id="page_content">
+    <br><br><br><br>
+    <div class="row">
+        <div class="s12 center">
+        </div>
+    </div>
+    <div class="row" style="margin: 0 auto; display: flex;">
+        <span ng-init="get_plan_details('<%=plan_name%>');"></span>
+
+        <h3 class="center"> <!--TODO Center-->
+            {{topics_list.data[task_details.topic_id]}}
+        </h3>
+
+        <h4>
+            {{task_details.title}}
+        </h4>
+
+        <div>
+            {{task_details.details}}
+        </div>
+
+        <form ng-submit="submit_task();">
+            <!--TODO answer block-->
+
+            <div class="row">
+                <div class="col <%=access_level >= min_access_required.skip_tasks ? "s6" : "s12"%>">
+                    <button type="submit" class="col s12 waves-effect waves-green btn-flat">Submit</button>
+                </div>
+                <% if (access_level >= min_access_required.skip_tasks) { %>
+                    <div class="col s6">
+                        <button type="reset" ng-click="back_to_parent_category();" class="col s12 waves-effect waves-red btn-flat">Cancel</button>
+                    </div>
+                <% } %>
+            </div>
+        </form>
+    </div>
+</div>
+
+<% include ../partials/global/footer.html %>
+</body>
+</html>

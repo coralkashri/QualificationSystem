@@ -85,7 +85,7 @@ let init_tasks_schema = async _ => {
             enum: ["TEXT_STRONG", "TEXT_SOFT", "TEXT_FREE", "FILES", "COMPILATION_RESULT", "BOOLEAN", "MULTIPLE_CHOICES"],
             // Auto Test for: TEXT_STRONG, TEXT_SOFT, COMPILATION_RESULT, BOOLEAN, MULTIPLE_CHOICES
             // No Auto Test for: TEXT_FREE, FILES
-            default: "TEXT"
+            default: "TEXT_FREE"
         },
         file_names: [String],
         answer_options: [String], // For boolean
@@ -93,23 +93,19 @@ let init_tasks_schema = async _ => {
         judgement_criteria: [String],
         hints: [String],
         plan_exceptions: [
-            { // Exception block
-                plans: [
-                    { // Plan block
-                        id: {
-                            type: String,
-                            required: true
-                        },
-                        section: {
-                            type: String,
-                            required: true
-                        },
-                        text: {
-                            type: String,
-                            required: true
-                        }
-                    }
-                ]
+            { // Plan block
+                id: {
+                    type: String, // Plan ID
+                    required: true
+                },
+                task_progress_value: Number, // if not mentioned -- 1, else the number will define how much progress solving this task means to this specific plan (Zero/Positive only numbers)
+                details: String,
+                search_keywords: [String],
+                file_names: [String],
+                answer_options: [String],
+                code_sections: [String],
+                judgement_criteria: [String],
+                hints: [String]
             }
         ],
         answer: [String]

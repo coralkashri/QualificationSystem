@@ -1,0 +1,47 @@
+<!--Show all users list-->
+<span ng-init="init_view_tasks_page();"></span>
+
+<div class="row">
+    <div ng-repeat="task_data in tasks_list | orderBy: ['topic_id', 'inner_topic_order']">
+        <h3 ng-if="task_data.inner_topic_order == 0" class="col s12">
+            {{topics_list.data[task_data.topic_id]}}
+        </h3>
+        <div style="margin: 5px;" class="col s12 m6 l3 card sticky-action" draggable="true"
+             inner_topic_order="{{task_data.inner_topic_order}}" topic_id="{{task_data.topic_id}}" task_id="{{task_data._id}}">
+            <div class="card-content">
+                <span class="card-title grey-text text-darken-4">{{task_data.title}}<!--<i class="material-icons right">more_vert</i>--></span>
+                <span class="truncate">
+                    {{task_data.details}}
+                </span>
+            </div>
+
+            <div class="card-action">
+                <a class="btn-small waves-effect waves-light"
+                   href="/view/admin-panel/tasks-management/t{{task_data._id}}"
+                   title="Management">
+                    <i class="material-icons">settings</i>
+                </a>
+                <a class="btn-small waves-effect waves-light"
+                   ng-click="delete_task(task_data._id, task_data.title);"
+                   title="Delete">
+                    <i class="material-icons">delete</i>
+                </a>
+            </div>
+
+            <!--<div class="card-reveal">
+                <span class="card-title grey-text text-darken-4">{{task_data.title}}<i class="material-icons right">close</i></span>
+                <div class="row">
+                    <div class="col s6">Answer type:</div><div class="col s6">{{task_data.answer_type}}</div>
+                    <div class="col s6">Check point:</div><div class="col s6">{{task_data.check_point}}</div>
+                </div>
+            </div>-->
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col s12 m4">
+        <a class="btn-small btn-floating waves-effect waves-light" href="/view/admin-panel/tasks-management/new-task">
+            <i class="material-icons">add</i>
+        </a>
+    </div>
+</div>

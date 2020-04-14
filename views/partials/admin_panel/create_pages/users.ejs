@@ -1,0 +1,37 @@
+<!--Create new user-->
+<h4>Create New User</h4><br>
+<div class="row">
+    <form class="col s12" ng-submit="create_user();">
+        <div class="row">
+            <div class="input-field col s12">
+                <input id="username" type="text" class="validate" required="required">
+                <label for="username">Username</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s12">
+                <input id="password" type="password" class="validate" required="required">
+                <label for="password">Password</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s12">
+                <select id="user_role">
+                    <option value="3">Admin</option>
+                    <option value="2">Manger</option>
+                    <option selected value="1">User</option>
+                    <option value="0">Banned</option>
+                </select>
+                <label for="user_role">Role</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s6">
+                <button type="submit" class="col s12 waves-effect waves-green btn-flat">Create user</button>
+            </div>
+            <div class="col s6">
+                <button type="reset" ng-click="back_to_parent_category();" class="col s12 waves-effect waves-red btn-flat">Cancel</button>
+            </div>
+        </div>
+    </form>
+</div>

@@ -88,6 +88,8 @@ let get_plan_tasks = async (req, res, next) => {
     return query_res[0].route;
 };
 
+exports.get_plan_tasks = get_plan_tasks;
+
 /**
  *
  * @param req
