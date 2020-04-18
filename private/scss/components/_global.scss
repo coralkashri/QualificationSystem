@@ -141,10 +141,21 @@ body {
 
 ul {
   &.side-list {
+    $padding: 15px;
+    @media #{$small-and-down} {
+      display: flex;
+
+      li {
+        &:not(.list-title) {
+          margin-left: $padding;
+        }
+      }
+    }
+
     li {
       border-left: 3px solid;
       border-color: rgb(0, 34, 134);
-      padding-left: 15px;
+      padding-left: $padding;
       margin-bottom: 5px;
 
       &.list-title, &.list-default {

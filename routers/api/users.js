@@ -62,11 +62,17 @@ router.get("/u:username/plans/:plan_name/current-task", (req, res, next) => {
 
 router.post('/u:username/register/:plan_name', users_controller.register_to_plan);
 
-router.post('/u:username/plans/:plan_name/skip/:task_id', users_controller.register_to_plan);
+router.post('/u:username/plans/:plan_name/skip/:task_id', (req, res, next) => {
+    req.required_level = access_limitations.min_access_required.skip_tasks;
+    req.action_on_reject = _ => {
+        res.redirect('/403');
+    };
+    next();
+}, con_validator.require_access_level, users_controller.skip_task);
 
-router.post('/u:username/plans/:plan_name/submit/:task_id', users_controller.register_to_plan); // TODO
+router.post('/u:username/plans/:plan_name/submit/:task_id', users_controller.submit_task);
 
-router.post('/u:username/plans/:plan_name/submit-review/:task_id', users_controller.register_to_plan); // TODO
+router.post('/u:username/plans/:plan_name/submit-review/:task_id', users_controller.submit_task_review);
 
 router.post("/create", (req, res, next) => {
     req.required_level = access_limitations.min_access_required.create_new_user_with_specific_role;

@@ -1,6 +1,6 @@
 <!--Search Keywords-->
 <div ng-if="task_details.search_keywords.length > 0">
-    <ul class="section table-of-contents side-list">
+    <ul class="section side-list">
         <li class="list-title">Search Keywords</li>
         <li ng-repeat="keyword in task_details.search_keywords">
             {{keyword}}
@@ -10,7 +10,7 @@
 
 <!--Judgement Criteria-->
 <div ng-if="task_details.judgement_criteria.length > 0">
-    <ul class="section table-of-contents green-list side-list">
+    <ul class="section green-list side-list">
         <li class="list-title">Judgement Criteria</li>
         <li ng-repeat="criterion in task_details.judgement_criteria">
             {{criterion}}
@@ -20,7 +20,7 @@
 
 <!--Hints-->
 <div ng-if="task_details.hints.length > 0">
-    <ul class="section table-of-contents orange-list side-list">
+    <ul class="section orange-list side-list">
         <li class="list-title">Hints</li>
         <li ng-repeat="hint in task_details.visible_hints">
             {{hint}}

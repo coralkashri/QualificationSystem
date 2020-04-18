@@ -5,6 +5,9 @@
     <% include ../partials/global/basic_head.ejs %>
     <script type="text/javascript" src="/js/angular_modules/custom_modules_wrappers/files.js"></script>
     <script type="text/javascript" src="/js/angular_modules/services/users.js"></script>
+    <script type="text/javascript" src="/resources/js/ace/src-min-noconflict/ace.js"></script>
+    <script type="text/javascript" src="/js/init/ace_initialize.js"></script>
+    <script type="text/javascript" src="/js/angular_modules/directives/code_sections.js"></script>
     <script type="text/javascript" src="/js/angular_modules/controllers/pages/view_plan.js"></script>
     <title><%=plan_name%> Qualification Plan</title>
 </head>
@@ -16,16 +19,16 @@
         <br><br><br><br>
 
         <h3 class="col s12 center">
-            {{topic_data.name}}
+            {{topic_data.name || "System Message"}}
         </h3>
+
+        <div class="col s12 hide-on-med-and-up show-on-small">
+            <%- include('../partials/view_plan/task_meta_data') %>
+        </div>
+        <div class="hide-on-med-and-up show-on-small row"><div class="col s12"><div style="height: 5px;"></div></div></div>
 
         <div class="row" style="margin: 0 auto; display: flex;">
             <span ng-init="init_page('<%=username%>', '<%=plan_name%>');"></span>
-
-            <div class="col s12 hide-on-med-and-up show-on-small">
-                <%- include('../partials/view_plan/task_meta_data') %>
-            </div>
-            <div class="hide-on-med-and-up show-on-small row"><div class="col s12"><div style="height: 5px;"></div></div></div>
 
             <div class="col s12 m8 l9">
                 <h4 class="row">
@@ -37,7 +40,7 @@
                 </div>
 
                 <!--Task Related Images Files-->
-                <div class="row" ng-if="(task_details.file_names | img_files_filter : false).length > 0">
+                <div ng-if="(task_details.file_names | img_files_filter : false).length > 0" class="row">
                     <div id="gallery" class="justified-gallery">
                         <a lightgallery ng-repeat="filename in task_details.file_names | img_files_filter : false" href="{{'/uploads_dir/' + filename}}">
                             <img src="{{'/uploads_dir/' + filename}}">
@@ -49,9 +52,18 @@
                 </div>
 
                 <!--Task Related Non-Images Files-->
-                <div class="row">
+                <div ng-if="(task_details.file_names | img_files_filter : true).length > 0" class="row">
                     <div ng-repeat="filename in task_details.file_names | img_files_filter : true" class="col s6">
                         <div ng-bind-html="::display_file(filename)"></div>
+                    </div>
+                </div>
+
+                <!--Task Code Sections-->
+                <div ng-if="task_details.code_sections.length > 0" class="row">
+                    <div ng-repeat="code_section in task_details.code_sections" class="col s12">
+                        <div id="code_section_{{$index}}" class='row'>
+                            <div class='col s11 ace-editor' ace='restore_code_section' ng-model='task_details.code_sections[$index].content'></div>
+                        </div>
                     </div>
                 </div>
 
@@ -62,7 +74,7 @@
                     </div>
                 </div>
 
-                <div ng-if="['TEXT_SOFT', 'TEXT_FREE', 'COMPILATION_RESULT'].includes(task_details.answer_type)" class="row">
+                <div ng-if="['TEXT_SOFT', 'TEXT_FREE'].includes(task_details.answer_type)" class="row">
                     <div class="input-field col s12">
                         <textarea id="text_answer" ng-model="learner_answer" class="validate materialize-textarea"></textarea>
                         <label for="text_answer">Answer</label>
@@ -85,7 +97,7 @@
 
                 <div ng-if="task_details.answer_type === 'COMPILATION_RESULT'" class="row">
                     <div class="col s12">
-                        <!--TODO answer code preview-->
+                        <div class='ace-editor' ace='create_answer_code_section' ng-model='learner_answer'></div>
                     </div>
                     <div class="col s12">
                         <!--TODO compile answer-->
@@ -98,25 +110,25 @@
 
                 <div ng-if="task_details.answer_type === 'BOOLEAN'" class="row">
                     <label class="col s12" ng-repeat="option in task_details.answer_options">
-                        <input name="group1" value="{{option}}" type="radio" />
+                        <input name="answer_group" ng-model="$parent.$parent.learner_answer" value="{{option}}" type="radio" />
                         <span>{{option}}</span>
                     </label>
                 </div>
 
                 <div ng-if="task_details.answer_type === 'MULTIPLE_CHOICES'" class="row">
                     <label class="col s12" ng-repeat="option in task_details.answer_options">
-                        <input class="filled-in" value="{{option}}" type="checkbox" />
+                        <input class="filled-in" value="{{option}}" ng-model="$parent.$parent.learner_answer[$index]" type="checkbox" />
                         <span>{{option}}</span>
                     </label>
                 </div>
 
-                <div class="row">
+                <div ng-if="!task_details.is_system_task" class="row">
                     <div class="col <%=access_level >= min_access_required.skip_tasks ? "s6" : "s12"%>">
-                        <a ng-click="submit_task();" class="col s12 btn-small waves-effect waves-light">Submit</a>
+                        <a ng-click="submit_task(task_details, learner_answer);" class="col s12 btn-small waves-effect waves-light">Submit</a>
                     </div>
                     <% if (access_level >= min_access_required.skip_tasks) { %>
                         <div class="col s6">
-                            <a ng-click="" class="col s12 btn-small waves-effect waves-light">Skip</a>
+                            <a ng-click="skip_task(task_details);" class="col s12 btn-small waves-effect waves-light">Skip</a>
                         </div>
                     <% } %>
                 </div>
@@ -129,5 +141,6 @@
     </div>
 
     <% include ../partials/global/footer.html %>
+    <% include ../partials/modals/task_submit_result.html %>
 </body>
 </html>

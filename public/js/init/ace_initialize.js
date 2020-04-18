@@ -8,10 +8,10 @@
         name: "Toggle Fullscreen",
         bindKey: "F11",
         exec: function(editor) {
-            var fullScreen = dom.toggleCssClass(document.body, "fullScreen")
-            dom.setCssClass(editor.container, "fullScreen", fullScreen)
-            editor.setAutoScrollEditorIntoView(!fullScreen)
-            editor.resize()
+            var fullScreen = dom.toggleCssClass(document.body, "fullScreen");
+            dom.setCssClass(editor.container, "fullScreen", fullScreen);
+            editor.setAutoScrollEditorIntoView(!fullScreen);
+            editor.resize();
         }
     })
 })();

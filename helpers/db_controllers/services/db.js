@@ -170,6 +170,10 @@ let init_users_schema = _ => {
                         reviewer_msg: {
                             type: String,
                             required: true
+                        },
+                        date: {
+                            type: Date,
+                            default: Date.now
                         }
                     }
                 ],
@@ -197,6 +201,10 @@ let init_users_schema = _ => {
                         reviewer_msg: {
                             type: String,
                             required: true
+                        },
+                        date: {
+                            type: Date,
+                            default: Date.now
                         }
                     }
                 ],

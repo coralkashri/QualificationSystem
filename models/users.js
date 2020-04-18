@@ -257,9 +257,22 @@ exports.get_current_plan_task = async (req, res, next) => {
     req.query.plan_name = req.params.plan_name;
 
     // Arrange data
-    req.params.task_id = await get_user_plan_current_task_id(req, res, next);
+    let user_plan_data = await get_user_plan_data(req, res, next);
+    req.params.task_id = user_plan_data.current_task.id;
 
-    return await tasks_model.get(req, res, next);
+    let current_task = await tasks_model.get(req, res, next);
+
+    if (user_plan_data.current_task.status === "Completed") {
+        current_task = tasks_model.system_tasks.plan_completed;
+    }
+
+    if (current_task.check_point === "STRONG") {
+        if (user_plan_data.current_task.status !== "In Progress") {
+            current_task = tasks_model.system_tasks.strong_check_point;
+        }
+    }
+
+    return current_task;
 };
 
 exports.get_plan_progress = async (req, res, next) => {
@@ -444,18 +457,10 @@ exports.add_plan = async (req, res, next) => {
     req.query.username = username;
     req.query.plan_name = req.params.plan_name;
 
-    // Get optional params
-    let role = requests_handler.optional_param(req, "get", "user_role");
-
-    if (!role) {
-        role = await get_user_role(req, res, next);
-        req.query.role = role;
-    }
-
     // Validation
     assert.ok(await is_plan_registrable_by_user(req, res, next), "Can't register this user to this plan.");
 
-    if (role < access_limitations.min_access_required.register_other_users_to_plans) {
+    if (req.user.role < access_limitations.min_access_required.register_other_users_to_plans) {
         assert(req.user.username === username, "You don't have a permission to register other users to plans.");
     }
 
@@ -484,6 +489,173 @@ exports.add_plan = async (req, res, next) => {
     assert.equal(new_user.ok, true, "Plan addition to user failed.");
 
     return new_user;
+};
+
+exports.skip_task = async (req, res, next) => {
+    // Get DB
+    let users_db_model = database.users_model();
+
+    // Get main params
+    let username = requests_handler.require_param(req, "route", "username");
+    let task_id = requests_handler.require_param(req, "route", "task_id");
+
+    // Set params for future queries
+    req.query.username = username;
+    req.query.plan_name = req.params.plan_name;
+
+    // Route Validation: the current user have a permission to skip tasks
+
+    // Validation
+
+    if (req.user.role < access_limitations.min_access_required.manage_other_users_plans) {
+        assert(req.user.username === username, "You don't have a permission to manage other users' plans.");
+    }
+
+    // Extract required details
+    let plan_id = await plans_model.get_plan_id(req);
+    let next_task_id = await plans_model.get_plan_next_mission_id(req);
+
+    // Prepare query
+    let filter = {
+        username: username,
+        "plans.id": plan_id
+    };
+    let update = {
+        $set: {
+            "plans.$.current_task": {
+                id: next_task_id
+            }
+        },
+        $push: {
+            "plans.$.skipped_tasks": task_id
+        }
+    };
+
+    // Perform action
+    let new_user = await users_db_model.updateOne(filter, update, {
+        new: true // Return the new object after the update is applied
+    }).exec();
+
+    // Post Validation
+    assert.equal(new_user.ok, true, "Task skip failed.");
+
+    return new_user;
+};
+
+exports.submit_task = async (req, res, next) => {
+    // Get DB
+    let users_db_model = database.users_model();
+
+    // Get main params
+    let username = requests_handler.require_param(req, "route", "username");
+    let task_id = requests_handler.require_param(req, "route", "task_id");
+
+    // Get params
+    let user_answer = requests_handler.require_param(req, "post", "answer");
+
+    // Set params for future queries
+    req.query.username = username;
+    req.query.plan_name = req.params.plan_name;
+
+    // Validation
+
+    if (req.user.role < access_limitations.min_access_required.manage_other_users_plans) {
+        assert(req.user.username === username, "You don't have a permission to manage other users' plans.");
+    }
+
+    // Extract required details
+    let plan_id = await plans_model.get_plan_id(req);
+    let task_details = await tasks_model.get(req, res, next);
+    task_details = task_details[0];
+    let next_task_id = await plans_model.get_plan_next_mission_id(req);
+
+    // Test submitted answer
+
+    let answer_status;
+    let response_to_user;
+    let update = undefined;
+    let is_task_failed = false;
+    try {
+        // Auto test
+        answer_status = tasks_model.check_answer(task_details.answer_type, task_details.answer, user_answer);
+        if (answer_status) {
+            response_to_user = "Mission accomplished!";
+            update = {
+                $push: {
+                    "plans.$.completed_tasks": {
+                        id: task_id,
+                        answer: user_answer,
+                        reviewer: "System",
+                        reviewer_msg: "Task completed"
+                    }
+                }
+            };
+            if (next_task_id) { // Set next task id
+                update.$set = {
+                    "plans.$.current_task": {
+                        id: next_task_id,
+                        status: "In Progress"
+                    }
+                };
+            } else { // Plan Completed
+                update.$set = {
+                    "plans.$.current_task": {
+                        status: "Completed"
+                    }
+                }
+            }
+        } else { // No Update
+            is_task_failed = true;
+            response_to_user = "Wrong answer, try again.";
+        }
+    } catch(e) {
+        // Send to review
+        response_to_user = "Answer sent to review.";
+        update = {
+            $push: {
+                "plans.$.tasks_for_review": {
+                    id: task_id,
+                    answer: user_answer
+                }
+            }
+        };
+        // Check task CHECK_POINT
+        if (["NONE", "SOFT"].includes(task_details.check_point)) {
+            update.$set = {
+                "plans.$.current_task": {
+                    id: next_task_id,
+                    status: "In Progress"
+                }
+            }
+        } else { // Strong CHECK_POINT
+            update.$set = {
+                "plans.$.current_task": {
+                    status: "In Review"
+                }
+            }
+        }
+    }
+
+    if (update) {
+        // Prepare query
+        let filter = {
+            username: username,
+            "plans.id": plan_id
+        };
+
+        // Perform action
+        let new_user = await users_db_model.updateOne(filter, update, {
+            new: true // Return the new object after the update is applied
+        }).exec();
+
+        // Post Validation
+        assert.equal(new_user.ok, true, "Task submission failed.");
+    }
+
+    return {
+        msg: response_to_user,
+        failed: is_task_failed
+    };
 };
 
 exports.remove = async (req, res, next) => {

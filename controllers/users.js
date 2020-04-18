@@ -152,6 +152,33 @@ exports.register_to_plan = async (req, res, next) => {
     }
 };
 
+exports.skip_task = async (req, res, next) => {
+    try {
+        let user = await users_model.skip_task(req, res, next);
+        return responses_gen.generate_response(res, 200, user, "Successfully skip task.");
+    } catch (e) {
+        return responses_gen.generate_response(res, 400, null, e.message);
+    }
+};
+
+exports.submit_task = async (req, res, next) => {
+    try {
+        let user = await users_model.submit_task(req, res, next);
+        return responses_gen.generate_response(res, 200, user, "Task successfully submitted.");
+    } catch (e) {
+        return responses_gen.generate_response(res, 400, null, e.message);
+    }
+};
+
+exports.submit_task_review = async (req, res, next) => {
+    try {
+        let user = await users_model.submit_task_review(req, res, next);
+        return responses_gen.generate_response(res, 200, user, "Review successfully submitted.");
+    } catch (e) {
+        return responses_gen.generate_response(res, 400, null, e.message);
+    }
+};
+
 exports.remove_user = async (req, res, next) => {
     try {
         let user = await users_model.remove(req, res, next);

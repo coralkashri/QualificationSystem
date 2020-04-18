@@ -8,6 +8,7 @@ exports.min_access_required = {
     create_new_user_with_specific_role: 2,
     modify_all_users: 2,
     register_other_users_to_plans: 2,
+    manage_other_users_plans: 2,
     delete_different_users: 2,
     delete_all_users: 2, // Delete all users in one shot -- Recreate admin user (admin@admin)
     create_topic: 2,

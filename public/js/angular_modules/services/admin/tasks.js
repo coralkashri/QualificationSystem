@@ -43,10 +43,11 @@ angular.module("adminTasksM", [])
                 return deferred.promise();
             };
 
-            _$scope.create_task = (task_data) => {
+            let prepare_full_task_params = (task_data) => {
                 // TODO add validations
-
+                let deferred = $.Deferred();
                 _preloader.start();
+
                 let pre_params = {
                     title: task_data.title,
                     topic_name: task_data.topic_name,
@@ -63,12 +64,11 @@ angular.module("adminTasksM", [])
                 };
 
                 // Collect files
-                pre_params.file_names = [];
+                pre_params.file_names = task_data.file_names || [];
                 let promises = [];
                 let files_inputs = $("#files_section input[type='file']");
                 for (let i = 0; i < files_inputs.length; i++) {
                     let formData = new FormData();
-                    let files = [];
                     for (let file_num = 0; file_num < files_inputs[i].files.length; file_num++) {
                         formData.append("files_to_upload", files_inputs[i].files[file_num]);
                     }
@@ -87,7 +87,15 @@ angular.module("adminTasksM", [])
                         pre_params.file_names.push.apply(pre_params.file_names, response);
                     }
                     pre_params.file_names = JSON.stringify(pre_params.file_names);
+                    deferred.resolve(pre_params);
+                }).catch(() => {
+                    deferred.reject("Params extraction failed.");
+                });
+                return deferred.promise();
+            };
 
+            _$scope.create_task = (task_data) => {
+                prepare_full_task_params(task_data).done((pre_params) => {
                     let params = $.param(pre_params);
                     _$http({
                         method: "POST",
@@ -104,56 +112,14 @@ angular.module("adminTasksM", [])
                     }).finally(() => {
                         _preloader.stop();
                     });
-                }).catch(() => {
+                }).catch((msg) => {
+                    alertify.error("Client: " + msg);
                     _preloader.stop();
                 });
             };
 
             _$scope.modify_task = (task_data) => {
-                // TODO add validations
-
-                _preloader.start();
-                let pre_params = {
-                    title: task_data.title,
-                    topic_name: task_data.topic_name,
-                    details: task_data.details,
-                    search_keywords: JSON.stringify(task_data.get_search_keywords()),
-                    check_point: task_data.check_point,
-                    code_sections: JSON.stringify(task_data.code_sections.filter((elem) => !!elem)),
-                    answer_type: task_data.answer_type,
-                    answer_options: JSON.stringify(task_data.answer_options),
-                    answer: JSON.stringify(task_data.answer),
-                    judgement_criteria: JSON.stringify(task_data.judgement_criteria),
-                    hints: JSON.stringify(task_data.hints),
-                    plan_exceptions: JSON.stringify(task_data.plan_exceptions)
-                };
-
-                // Collect files
-                pre_params.file_names = task_data.file_names || [];
-                let promises = [];
-                let files_inputs = $("#files_section input[type='file']");
-                for (let i = 0; i < files_inputs.length; i++) {
-                    let formData = new FormData();
-                    let files = [];
-                    for (let file_num = 0; file_num < files_inputs[i].files.length; file_num++) {
-                        formData.append("files_to_upload", files_inputs[i].files[file_num]);
-                    }
-                    //formData.append("files_to_upload", files_inputs[i].files);
-                    promises.push($http.post("/api/uploads/upload", formData, {
-                        //headers: {enctype:'multipart/form-data'}
-                        transformRequest: angular.identity,
-                        headers: {'Content-Type': undefined, enctype: 'multipart/form-data'}
-                    }));
-                }
-                Promise.all(promises).then((responses) => {
-                    // All files are uploaded
-                    // Get file names
-                    for (let i = 0; i < responses.length; i++) {
-                        let response = responses[i].data.data;
-                        pre_params.file_names.push.apply(pre_params.file_names, response);
-                    }
-                    pre_params.file_names = JSON.stringify(pre_params.file_names);
-
+                prepare_full_task_params(task_data).done((pre_params) => {
                     let params = $.param(pre_params);
                     _$http({
                         method: "POST",
@@ -170,7 +136,8 @@ angular.module("adminTasksM", [])
                     }).finally(() => {
                         _preloader.stop();
                     });
-                }).catch(() => {
+                }).catch((msg) => {
+                    alertify.error("Client: " + msg);
                     _preloader.stop();
                 });
             };

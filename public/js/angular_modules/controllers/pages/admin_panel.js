@@ -232,8 +232,13 @@ const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 
                 let element_id_block_prefix;
                 let next_element_id;
                 let next_element_block_id;
-                let next_element_number = collection.length;
-                collection[next_element_number] = {};
+                let next_element_number;
+                if (!is_restore) {
+                    next_element_number = collection.length;
+                    collection[next_element_number] = {};
+                } else {
+                    next_element_number = collection.length - 1;
+                }
 
                 let section_element = $("#" + section_id);
 

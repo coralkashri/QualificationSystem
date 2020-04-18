@@ -162,6 +162,17 @@ let get_task_plan_exceptions = async (req, res, next) => {
 
 exports.get_task_plan_exceptions = get_task_plan_exceptions;
 
+let is_answer_type_have_auto_check = (answer_type) => {
+    return ["TEXT_STRONG", "TEXT_SOFT", "COMPILATION_RESULT", "BOOLEAN", "MULTIPLE_CHOICES"].includes(answer_type);
+};
+
+exports.check_answer = (answer_type, legal_answer, answer) => {
+    assert.ok(is_answer_type_have_auto_check(answer_type), "Moderator check required.");
+    let is_legal_answer = true;
+
+
+    return is_legal_answer;
+};
 
 // API Routes
 
@@ -362,4 +373,21 @@ exports.remove = async (req, res, next) => {
 
     // Perform action
     return tasks_db_model.remove({_id: target_task}).exec();
+};
+
+
+// Data Structures
+
+exports.system_tasks = {
+    strong_check_point: {
+        title: "Check Point - Please wait for tasks review",
+        details: "The last submitted task was a check-point task, which means that you have to wait for administrator review before continue to your next task in this plan." +
+            "If you are register to another plans, you may continue with their paths or learn something until administrator will be free to review your response.",
+        is_system_task: true
+    },
+    plan_completed: {
+        title: "!Congratulation!",
+        details: "Congratulation! You just hit the end of the plan! Please contact your administrator and let him know.",
+        is_system_task: true
+    }
 };

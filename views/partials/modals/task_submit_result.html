@@ -1,10 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<div id="task_submit_result_modal" class="modal">
+    <div class="modal-content">
+        <h4>Answer Successfully Sent</h4>
+        <div ng-show="task_submit_result.failed">
+            <div class="valign-wrapper flash flash-error" style="width: 100%;">
+                <i class="material-icons" style="padding-right: 5px;">error</i>
+                {{task_submit_result.msg}}
+            </div>
+        </div>
+        <div ng-hide="task_submit_result.failed" class="">
+            <div class="valign-wrapper flash flash-success" style="width: 100%;">
+                <i class="material-icons" style="padding-right: 5px;">done</i>
+                {{task_submit_result.msg}}
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <a ng-hide="task_submit_result.failed" onclick="location.reload();" class="modal-close waves-effect waves-green btn-flat">Continue</a>
+        <a ng-show="task_submit_result.failed" class="modal-close waves-effect waves-red btn-flat">Try Again</a>
+    </div>
+</div>
 
-</body>
-</html>
+<script>
+    $("#task_submit_result_modal").modal();
+</script>
