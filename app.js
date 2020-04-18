@@ -17,6 +17,8 @@ let app = express()
 
     .use('/uploads_dir', express.static(__dirname + '/helpers/db_controllers/uploads'))
 
+    .use('/viewer', express.static(__dirname + '/node_modules/node-viewerjs/release'))
+
     .use(session({
         cookieName: 'session',
         secret: 'as#*&*(asf4334@21#$@#1\t2ikl;4j\'32fsda8a4asd\5fet1d42hjk3@#$#\P^\"^%wefrwe19a3f2sED75*^&*5qj$!@#$!#12\+34#\'$!@joUILvxcxcuXds1ik\\laD5$cbv6ef\\\\\fjDASrA87\"345\'yttr%@asdf##$@34234',

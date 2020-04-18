@@ -1,9 +1,9 @@
 <span ng-init="init_topics_page();"></span>
 
 <% if (typeof action === 'undefined') { %>
-    <%- include('view_list_pages/topics.ejs');%>
+    <%- include('view_list_pages/topics.ejs'); %>
 <% } else if (action == "view" && typeof topic_name_for_details !== "undefined") { %>
-    <%- include('modify_pages/topics.ejs');%>
+    <%- include('modify_pages/topics.ejs'); %>
 <% } else if (action == "create") { %>
-    <%- include('create_pages/topics.ejs');%>
+    <%- include('create_pages/topics.ejs'); %>
 <% } %>

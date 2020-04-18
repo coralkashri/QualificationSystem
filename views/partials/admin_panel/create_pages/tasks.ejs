@@ -76,16 +76,17 @@
         <!--Codes Sections-->
         <div class="row">
             <div class="col s12" id="codes_section">
-                <div id="code_section_block_0"> <!--Code data block-->
-                    <div class="input-field col s12">
+                <!--<div class="row" id="code_section_block_0"> &lt;!&ndash;Code data block&ndash;&gt;
+                    &lt;!&ndash;<div class="input-field col s12">
                         <textarea id="code_section_0" ng-model="task_data.code_sections[0]" class="validate materialize-textarea"></textarea>
                         <label for="code_section_0">Code Section</label>
                     </div>
                     <div class="col s12">
                         <div>Preview:</div>
                         <div id="code_section_0_preview"></div>
-                    </div>
-                </div>
+                    </div>&ndash;&gt;
+                    <div class="col s12 ace-editor" ace="initialize_code_section" ng-model="task_data.code_sections[0]"></div>
+                </div>-->
             </div>
             <div style="padding-top: 10px;" class="col s12">
                 <a class="btn-small waves-effect waves-light" ng-click="add_input_row('codes_section', 'code', task_data.code_sections);">

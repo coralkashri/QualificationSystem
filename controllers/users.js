@@ -53,7 +53,16 @@ exports.is_plan_registrable_by_user = is_plan_registrable_by_user;
 exports.get_plan_progress = async (req, res, next) => {
     try {
         let progress = await users_model.get_plan_progress(req, res, next);
-        return responses_gen.generate_response(res, 200, progress, "Progress successfully restored");
+        return responses_gen.generate_response(res, 200, progress, "Progress successfully restored.");
+    } catch (e) {
+        return responses_gen.generate_response(res, 400, null, e.message);
+    }
+};
+
+exports.get_current_plan_task = async (req, res, next) => {
+    try {
+        let current_task = await users_model.get_current_plan_task(req, res, next);
+        return responses_gen.generate_response(res, 200, current_task, "Current task successfully restored.");
     } catch (e) {
         return responses_gen.generate_response(res, 400, null, e.message);
     }
@@ -69,7 +78,7 @@ exports.get_available_plans = async (req, res, next) => {
         for (let i = 0; i < plans.length; i++) {
             plans[i]._doc.is_registered = await is_user_registered_to_plan(username, plans[i].name);
         }
-        return responses_gen.generate_response(res, 200, plans, "Plans successfully restored");
+        return responses_gen.generate_response(res, 200, plans, "Plans successfully restored.");
     } catch (e) {
         return responses_gen.generate_response(res, 400, null, e.message);
     }
@@ -92,7 +101,7 @@ exports.get_registered_plans = async (req, res, next) => {
             plans[i]._doc.is_registered = true;
         }
 
-        return responses_gen.generate_response(res, 200, plans, "Plans successfully restored");
+        return responses_gen.generate_response(res, 200, plans, "Plans successfully restored.");
     } catch (e) {
         return responses_gen.generate_response(res, 400, null, e.message);
     }
@@ -101,7 +110,7 @@ exports.get_registered_plans = async (req, res, next) => {
 exports.get_users = async (req, res, next) => {
     try {
         let users = await users_model.get(req, res, next); // all
-        return responses_gen.generate_response(res, 200, users, "Users successfully restored");
+        return responses_gen.generate_response(res, 200, users, "Users successfully restored.");
     } catch (e) {
         return responses_gen.generate_response(res, 400, null, e.message);
     }
@@ -110,7 +119,7 @@ exports.get_users = async (req, res, next) => {
 exports.get_user = async (req, res, next) => {
     try {
         let user = await users_model.get(req, res, next); // by id
-        return responses_gen.generate_response(res, 200, user, "User successfully restored");
+        return responses_gen.generate_response(res, 200, user, "User successfully restored.");
     } catch (e) {
         return responses_gen.generate_response(res, 400, null, e.message);
     }
@@ -119,7 +128,7 @@ exports.get_user = async (req, res, next) => {
 exports.add_user = async (req, res, next) => {
     try {
         let user = await users_model.add(req, res, next);
-        return responses_gen.generate_response(res, 200, user, "User successfully created");
+        return responses_gen.generate_response(res, 200, user, "User successfully created.");
     } catch (e) {
         return responses_gen.generate_response(res, 400, null, e.message);
     }
@@ -128,7 +137,7 @@ exports.add_user = async (req, res, next) => {
 exports.modify_user = async (req, res, next) => {
     try {
         let user = await users_model.modify(req, res, next);
-        return responses_gen.generate_response(res, 200, user, "User successfully modified");
+        return responses_gen.generate_response(res, 200, user, "User successfully modified.");
     } catch (e) {
         return responses_gen.generate_response(res, 400, null, e.message);
     }
@@ -137,7 +146,7 @@ exports.modify_user = async (req, res, next) => {
 exports.register_to_plan = async (req, res, next) => {
     try {
         let user = await users_model.add_plan(req, res, next);
-        return responses_gen.generate_response(res, 200, user, "User successfully registered to plan");
+        return responses_gen.generate_response(res, 200, user, "User successfully registered to plan.");
     } catch (e) {
         return responses_gen.generate_response(res, 400, null, e.message);
     }
@@ -146,7 +155,7 @@ exports.register_to_plan = async (req, res, next) => {
 exports.remove_user = async (req, res, next) => {
     try {
         let user = await users_model.remove(req, res, next);
-        return responses_gen.generate_response(res, 200, user, "User successfully deleted");
+        return responses_gen.generate_response(res, 200, user, "User successfully deleted.");
     } catch (e) {
         return responses_gen.generate_response(res, 400, null, e.message);
     }

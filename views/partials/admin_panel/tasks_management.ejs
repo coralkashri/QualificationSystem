@@ -1,9 +1,13 @@
+<script type="text/javascript" src="/resources/js/ace/src-min-noconflict/ace.js"></script>
+<script type="text/javascript" src="/js/init/ace_initialize.js"></script>
 <span ng-init="init_tasks_page();"></span>
 
+<% include ../modals/select_ace_properties_modal.html %>
+
 <% if (typeof action === 'undefined') { %>
-    <%- include('view_list_pages/tasks.ejs');%>
+    <%- include('view_list_pages/tasks.ejs'); %>
 <% } else if (action == "view" && typeof task_id_for_details !== "undefined") { %>
-    <%- include('modify_pages/tasks.ejs');%>
+    <%- include('modify_pages/tasks.ejs'); %>
 <% } else if (action == "create") { %>
-    <%- include('create_pages/tasks.ejs');%>
+    <%- include('create_pages/tasks.ejs'); %>
 <% } %>

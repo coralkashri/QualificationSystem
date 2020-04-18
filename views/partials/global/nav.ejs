@@ -111,10 +111,19 @@
                     <a style="font-size: 20px;" href="/view/versions"><%=page_view_name%> Qualification Plan</a>
                 </div>
                 <div class="col s10 offset-s1 center" style="padding-top: 5px">
-                    <div ng-init="plan_progress = get_plan_progress();" class="blue" style="height: 21px;" ng-style="get_css_property('width', plan_progress + '%')"></div>
+                    <!--<div class="blue" style="height: 21px;" ng-style="get_css_property('width', plan_progress + '%')"></div>
                     <span style="display: block; margin: -22px">
                         {{plan_progress}}%
-                    </span>
+                    </span>-->
+
+                    <div class="progress-bar animate"
+                         ng-class="[{'pb-orange': plan.progress.is_tasks_waiting_for_review},
+                                    {'pb-red': plan.progress.is_tasks_declined}]">
+                        <span ng-style="get_css_property('width', (plan.progress.value * 100) + '%')"></span>
+                        <div>
+                            {{plan.is_registered ? plan.progress.value * 100 + '%': "Watcher"}}
+                        </div>
+                    </div>
                 </div>
             <% } else { %>
                 <div class="col s10 offset-s1 center">

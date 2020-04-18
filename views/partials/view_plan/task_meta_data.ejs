@@ -1,0 +1,32 @@
+<!--Search Keywords-->
+<div ng-if="task_details.search_keywords.length > 0">
+    <ul class="section table-of-contents side-list">
+        <li class="list-title">Search Keywords</li>
+        <li ng-repeat="keyword in task_details.search_keywords">
+            {{keyword}}
+        </li>
+    </ul>
+</div>
+
+<!--Judgement Criteria-->
+<div ng-if="task_details.judgement_criteria.length > 0">
+    <ul class="section table-of-contents green-list side-list">
+        <li class="list-title">Judgement Criteria</li>
+        <li ng-repeat="criterion in task_details.judgement_criteria">
+            {{criterion}}
+        </li>
+    </ul>
+</div>
+
+<!--Hints-->
+<div ng-if="task_details.hints.length > 0">
+    <ul class="section table-of-contents orange-list side-list">
+        <li class="list-title">Hints</li>
+        <li ng-repeat="hint in task_details.visible_hints">
+            {{hint}}
+        </li>
+        <li class="list-default" ng-show="task_details.visible_hints.length < task_details.hints.length">
+            <a ng-click="get_next_hint();">Get Next</a>
+        </li>
+    </ul>
+</div>

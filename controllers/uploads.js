@@ -32,3 +32,15 @@ exports.delete_files = async (req, res, next) => {
         return responses_gen.generate_response(res, 400, null, e.message);
     }
 };
+
+
+// View
+
+exports.view_files = async (req, res, next) => {
+    try {
+        let filename = requests_handler.require_param(req, "route", "filename");
+        res.render("public/resources/ViewerJS/index.html#../uploads_dir/" + filename);
+    } catch (e) {
+        return responses_gen.generate_response(res, 400, null, e.message);
+    }
+};

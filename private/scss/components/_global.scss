@@ -8,11 +8,11 @@
   position: fixed;
   padding-top: 8px;
   height: $page-sticky-header-height;
-  z-index: 2;
+  z-index: 3;
 
   .nav-content {
     * {
-      z-index: 3;
+      z-index: 4;
     }
   }
 }
@@ -73,7 +73,7 @@
   left: calc(50% - 25px);
 
   &.active {
-    z-index: 11;
+    z-index: 12;
   }
 
   @media only screen and (min-width : calc(992px + 1px)) {
@@ -137,4 +137,43 @@ body {
 .accept-color {
   @extend .teal;
   @extend .lighten-1;
+}
+
+ul {
+  &.side-list {
+    li {
+      border-left: 3px solid;
+      border-color: rgb(0, 34, 134);
+      padding-left: 15px;
+      margin-bottom: 5px;
+
+      &.list-title, &.list-default {
+        border-left: 0;
+        padding-left: 0;
+        margin-bottom: 0;
+      }
+
+      &.list-title {
+        font-weight: bold;
+      }
+    }
+
+    &.orange-list {
+      li {
+        border-color: #{color("orange", "darken-2")};
+      }
+    }
+
+    &.green-list {
+      li {
+        border-color: #{color("green", "darken-2")};
+      }
+    }
+  }
+}
+
+.slider-img-responsive {
+  background-repeat: no-repeat;
+  background-size: contain !important;
+  background-position: center top !important;
 }

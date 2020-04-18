@@ -42,17 +42,31 @@ router.get("/u:username/registered-plans", (req, res, next) => {
     next();
 }, con_validator.require_access_level, users_controller.get_registered_plans);
 
-router.get("/u:username/plan-progress/:plan_name", (req, res, next) => {
+router.get("/u:username/plans/:plan_name/progress", (req, res, next) => {
     req.required_level = access_limitations.min_access_required.view_profile;
     req.action_on_reject = _ => {
         res.redirect('/403');
     };
     next();
-}, con_validator.require_access_level, users_controller.get_registered_plans);
+}, con_validator.require_access_level, users_controller.get_plan_progress);
+
+router.get("/u:username/plans/:plan_name/current-task", (req, res, next) => {
+    req.required_level = access_limitations.min_access_required.view_profile;
+    req.action_on_reject = _ => {
+        res.redirect('/403');
+    };
+    next();
+}, con_validator.require_access_level, users_controller.get_current_plan_task);
 
 // POST routes
 
 router.post('/u:username/register/:plan_name', users_controller.register_to_plan);
+
+router.post('/u:username/plans/:plan_name/skip/:task_id', users_controller.register_to_plan);
+
+router.post('/u:username/plans/:plan_name/submit/:task_id', users_controller.register_to_plan); // TODO
+
+router.post('/u:username/plans/:plan_name/submit-review/:task_id', users_controller.register_to_plan); // TODO
 
 router.post("/create", (req, res, next) => {
     req.required_level = access_limitations.min_access_required.create_new_user_with_specific_role;

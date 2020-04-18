@@ -1,7 +1,7 @@
 <% if (typeof action === 'undefined') { %>
-    <%- include('view_list_pages/users.ejs');%>
+    <%- include('view_list_pages/users.ejs'); %>
 <% } else if (action == "view" && typeof username_for_details !== "undefined") { %>
-    <%- include('modify_pages/users.ejs');%>
+    <%- include('modify_pages/users.ejs'); %>
 <% } else if (action == "create") { %>
-    <%- include('create_pages/users.ejs');%>
+    <%- include('create_pages/users.ejs'); %>
 <% } %>

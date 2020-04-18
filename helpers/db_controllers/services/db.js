@@ -89,7 +89,13 @@ let init_tasks_schema = async _ => {
         },
         file_names: [String],
         answer_options: [String], // For boolean
-        code_sections: [String],
+        code_sections: [
+            {
+                content: String,
+                theme: String,
+                language: String
+            }
+        ],
         judgement_criteria: [String],
         hints: [String],
         plan_exceptions: [
@@ -98,7 +104,7 @@ let init_tasks_schema = async _ => {
                     type: String, // Plan ID
                     required: true
                 },
-                task_progress_value: Number, // if not mentioned -- 1, else the number will define how much progress solving this task means to this specific plan (Zero/Positive only numbers)
+                task_progress_value: Number, // if not mentioned -- 1, the number will define how much progress solving this task means to this specific plan (Zero/Positive only numbers)
                 details: String,
                 search_keywords: [String],
                 file_names: [String],
@@ -160,9 +166,14 @@ let init_users_schema = _ => {
                         reviewer: { // Reviewer user id || "System" => For auto test
                             type: String,
                             required: true
+                        },
+                        reviewer_msg: {
+                            type: String,
+                            required: true
                         }
                     }
                 ],
+                skipped_tasks: [String],
                 tasks_for_review: [
                     {
                         id: {
@@ -179,7 +190,11 @@ let init_users_schema = _ => {
                             required: true
                         },
                         answer: [String], // TODO make it required
-                        last_reviewer: { // Reviewer user id
+                        last_reviewer: { // Reviewer user id || "System" => For auto test
+                            type: String,
+                            required: true
+                        },
+                        reviewer_msg: {
                             type: String,
                             required: true
                         }

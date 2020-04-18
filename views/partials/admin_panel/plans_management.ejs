@@ -1,7 +1,7 @@
 <% if (typeof action === 'undefined') { %>
-    <%- include('view_list_pages/plans.ejs');%>
+    <%- include('view_list_pages/plans.ejs'); %>
 <% } else if (action == "view" && typeof plan_name_for_details !== "undefined") { %>
-    <%- include('modify_pages/plans.ejs');%>
+    <%- include('modify_pages/plans.ejs'); %>
 <% } else if (action == "create") { %>
-    <%- include('create_pages/plans.ejs');%>
+    <%- include('create_pages/plans.ejs'); %>
 <% } %>

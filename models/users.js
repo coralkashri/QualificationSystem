@@ -199,8 +199,68 @@ let is_user_registered_to_plan = async (req, res, next) => {
 
 exports.is_user_registered_to_plan = is_user_registered_to_plan;
 
+/**
+ * @param req - pure request variable, checks for req.user.role
+ * @param target_username - Username to access it's data.
+ *
+ * @throws Error if the current user have no permissions to access the desired data.
+ */
+let validate_user_access_to_user_data = (req, target_username) => {
+    if (req.user && req.user.role < access_limitations.min_access_required.view_users_details && req.user.username !== target_username) {
+        throw new Error("You have no permission to watch this user.");
+    }
+};
+
+/**
+ * @param req
+ * req["query"]["username"] - Target user
+ * req["query"]["plan_name"] - Check for plan
+ *
+ * @returns The plan data related to the user (in pseudo DB: users[target_user].plans[target_plan])
+ */
+let get_user_plan_data = async (req, res, next) => {
+    // Get DB
+    let users_db_model = database.users_model();
+
+    // Extract main param
+    let username = requests_handler.require_param(req, "route", "username");
+    let target_plan_id = (await plans_model.get_plan_id(req, res, next)).toString();
+
+    // Validations
+    validate_user_access_to_user_data(req, username);
+
+    assert.ok(await is_user_registered_to_plan(req, res, next), "User does not registered to this plan.");
+
+    let query = {};
+    query.username = username;
+    let user_data = await users_db_model.find(query, '-password').exec();
+    user_data = user_data[0];
+    return user_data.plans.filter((plan) => plan.id === target_plan_id)[0];
+};
+
+/**
+ * @param req
+ * req["query"]["username"] - Target user
+ * req["query"]["plan_name"] - Check for plan
+ *
+ * @returns The plan current task id related to the user (in pseudo DB: users[target_user].plans[target_plan].current_task.id)
+ */
+let get_user_plan_current_task_id = async (req, res, next) => {
+    return (await get_user_plan_data(req, res, next)).current_task.id;
+};
 
 // API
+
+exports.get_current_plan_task = async (req, res, next) => {
+    // Prepare params for future access
+    req.query.username = req.params.username;
+    req.query.plan_name = req.params.plan_name;
+
+    // Arrange data
+    req.params.task_id = await get_user_plan_current_task_id(req, res, next);
+
+    return await tasks_model.get(req, res, next);
+};
 
 exports.get_plan_progress = async (req, res, next) => {
     // Get DB
@@ -208,35 +268,21 @@ exports.get_plan_progress = async (req, res, next) => {
 
     // Extract param
     let username = requests_handler.require_param(req, "route", "username");
-    let target_plan = requests_handler.optional_param(req, "route", "plan_name");
 
     // Prepare params for future access
     req.query.username = req.params.username;
     req.query.plan_name = req.params.plan_name;
 
-    // Validation
-    if (req.user && req.user.role < access_limitations.min_access_required.view_users_details && req.user.username !== username) {
-        throw new Error("You have no permission to watch this user.");
-    }
-
-    let is_registered = await is_user_registered_to_plan(req, res, next);
-    assert.ok(is_registered, "User does not registered to this plan.");
-
     // Arrange data
-    let query = {};
-    query.username = username;
-    let plan_details = await plans_model.get(req, res, next);
-    plan_details = plan_details[0];
-    let user_data = await users_db_model.find(query, '-password').exec();
-    let target_plan_id = plan_details._id;
-    req.query.plan_id = target_plan_id; // Used inside the loop in the call for tasks_model.get_task_plan_exceptions
-
+    let plan_details = (await plans_model.get(req, res, next))[0];
     let plan_route = plan_details.route;
-    let user_plan = user_data.plans.filter((plan) => plan.id === target_plan_id)[0];
 
+    let user_plan = await get_user_plan_data(req, res, next);
     let current_user_task_id = user_plan.current_task.id;
-    let is_user_completed_current_task = true; // Inside the loop, indicates if the current checked task is already completed by this user.
 
+    // Get Progress Algorithm
+    req.query.plan_id = plan_details._id.toString(); // Used inside the loop in the call for tasks_model.get_task_plan_exceptions
+    let is_user_completed_current_task = true; // Inside the loop, indicates if the current checked task is already completed by this user.
     let progress;
     let current_user_plan_progress_value; // TODO consider to save in the DB to save time
     let total_plan_progress_value; // TODO consider to save in the DB to save time
@@ -244,6 +290,7 @@ exports.get_plan_progress = async (req, res, next) => {
     current_user_plan_progress_value = total_plan_progress_value = 0;
     for (let i = 0; i < plan_route.length; i++) {
         let task_id = plan_route[i];
+        req.query.task_id = task_id;
         let task_value;
         let plan_exceptions = await tasks_model.get_task_plan_exceptions(req, res, next);
         if (!plan_exceptions) {
@@ -260,7 +307,11 @@ exports.get_plan_progress = async (req, res, next) => {
         total_plan_progress_value += task_value;
     }
     progress = current_user_plan_progress_value / total_plan_progress_value;
-    return progress;
+    return {
+        value: progress,
+        is_tasks_declined: user_plan.declined_tasks.length,
+        is_tasks_waiting_for_review: user_plan.tasks_for_review.length
+    };
 };
 
 exports.get = async (req, res, next) => {
@@ -271,9 +322,7 @@ exports.get = async (req, res, next) => {
     let username = requests_handler.optional_param(req, "route", "username");
 
     // Validation
-    if (req.user && req.user.role < access_limitations.min_access_required.view_users_details && req.user.username !== username) {
-        throw new Error("You have no permission to watch this user.");
-    }
+    validate_user_access_to_user_data(req, username);
 
     /* Assumptions here:
     *   1. The user might be logged in OR logged out.
@@ -413,7 +462,6 @@ exports.add_plan = async (req, res, next) => {
     // Extract required details
     let plan_id = await plans_model.get_plan_id(req);
     let first_task_id = await plans_model.get_plan_next_mission_id(req);
-    first_task_id = "a";
     // Prepare query
     let filter = {username: username};
     let update = {

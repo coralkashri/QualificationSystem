@@ -3,13 +3,12 @@
 
 <head>
     <%include ../partials/global/basic_head.ejs%>
-    <script type="text/javascript" src="/js/services/plans.js"></script>
-    <script type="text/javascript" src="/js/services/topics.js"></script>
-    <script type="text/javascript" src="/js/services/admin/users.js"></script>
-    <script type="text/javascript" src="/js/services/admin/plans.js"></script>
-    <script type="text/javascript" src="/js/services/admin/topics.js"></script>
-    <script type="text/javascript" src="/js/services/admin/tasks.js"></script>
-    <script type="text/javascript" src="/js/pages/admin_panel.js"></script>
+    <script type="text/javascript" src="/js/angular_modules/services/admin/users.js"></script>
+    <script type="text/javascript" src="/js/angular_modules/services/admin/plans.js"></script>
+    <script type="text/javascript" src="/js/angular_modules/services/admin/topics.js"></script>
+    <script type="text/javascript" src="/js/angular_modules/services/admin/tasks.js"></script>
+    <script src="/js/angular_modules/directives/code_sections.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="/js/angular_modules/controllers/pages/admin_panel.js"></script>
     <title>Qualification System - Admin Panel</title>
 </head>
 <body class="rtl" ng-controller="body_controller" data-ng-init="init()">
