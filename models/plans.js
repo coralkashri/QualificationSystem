@@ -127,11 +127,7 @@ let get_plan_next_mission_id = async (req, res, next) => {
     let plans_db_model = database.plans_model();
 
     // Extract params
-    let plan_name = requests_handler.require_param(req, "get", "plan_name");
     let current_task_id = requests_handler.optional_param(req, "get", "task_id");
-
-    // Get require field
-    let plan_id = await get_plan_id(req, res, next);
 
     // Task validation
     if (current_task_id) {

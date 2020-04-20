@@ -75,6 +75,11 @@ const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 
                 }
             });
 
+            // Override users.submit_task
+            $scope.submit_task = (task_details, learner_answer) => {
+                users_s.submit_task(task_details, learner_answer, username, plan_name);
+            };
+
             // TODO restore user answer
         };
     });

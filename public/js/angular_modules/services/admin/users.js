@@ -60,11 +60,15 @@ angular.module("adminUsersM", [])
 
             _$scope.modify_user = (username) => {
                 let route = "/api/users/modify/" + username;
-                let params = $.param({
-                    username: $("#username").val(),
-                    password: $("#password").val(),
-                    role: $("#user_role").val()
-                });
+                let pre_params = {};
+                let new_username = $("#username").val();
+                let new_password = $("#password").val();
+                let new_role = $("#user_role").val();
+                if (new_username) pre_params.username = new_username;
+                if (new_password) pre_params.password = new_password;
+                if (new_role) pre_params.role = new_role;
+
+                let params = $.param(pre_params);
                 _$http({
                     method: "POST",
                     url: route,
