@@ -401,11 +401,13 @@ exports.modify = async (req, res, next) => {
     assert.ok(!!req.session.user, "User disconnected, please login.");
 
     // Get params
-    if (req.session.user.role <= access_limitations.min_access_required.modify_all_users) {
+    if (req.session.user.role < access_limitations.min_access_required.modify_all_users) {
         current_password = requests_handler.require_param(req, "post", "current_password");
+        current_password = hash(current_password);
     }
     let new_username = requests_handler.optional_param(req, "post", "username");
     let new_password = requests_handler.optional_param(req, "post", "password");
+    new_password = new_password && hash(new_password);
     let new_role = requests_handler.optional_param(req, "post", "role");
 
     // Pre Validations
@@ -426,7 +428,7 @@ exports.modify = async (req, res, next) => {
     let filter = {username: username};
     let update = { $set: update_struct };
     if (current_password) {
-        filter.password = hash(current_password);
+        filter.password = current_password;
         delete update.$set.role;
     }
 
