@@ -198,3 +198,12 @@
     border-color: $input-disabled-solid-color;
   }
 }
+
+// Colors
+[type="checkbox"] {
+  &:required:not(:checked), &.invalid, &.ng-invalid {
+    + span:not(.lever)::after {
+      border: 2px solid $error-color !important;
+    }
+  }
+}

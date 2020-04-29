@@ -1,7 +1,9 @@
 <!--Show specific plan details-->
-<div ng-init="get_plan_details('<%= plan_name_for_details %>');">
+<script type="text/javascript" src="/resources/js/dragon-drop.js"></script>
+
+<div ng-init="init_modify_plan_page('<%= plan_name_for_details %>');">
     <h4>{{original_plan_name}}</h4><br>
-    <form ng-submit="modify_plan(original_plan_name, plan_data);">
+    <form name="plan_form" ng-submit="plan_form.$valid && modify_plan(original_plan_name, plan_data);">
         <div class="row">
             <div class="input-field col s12">
                 <input id="plan_name" ng-model="plan_data.name" type="text" class="validate">
@@ -28,7 +30,31 @@
             </div>
         </div>
 
-        <!--TODO rout editing-->
+        <div class="row" id="route_editing">
+            <div ng-repeat="topic in utils.values(topics_data_with_tasks_list || {}) | orderBy: ['topic_order']">
+                <div ng-show="plan_form['topic_checkbox_' + topic.name].$invalid"><!--TODO make it prettier-->
+                    <span ng-show="plan_form['topic_checkbox_' + topic.name].$error.dependencies_come_first" class="label label-danger">This topic is a dependency of topics: {{all_dependencies_topics[topic.name]}}, It must come before them.</span>
+                    <span ng-show="plan_form['topic_checkbox_' + topic.name].$error.required" class="label label-danger">This topic is a dependency of topics: {{all_dependencies_topics[topic.name]}}, you must select it.</span>
+                </div>
+                <br ng-hide="plan_form['topic_checkbox_' + topic.name].$invalid">
+                <button aria-describedby="global-help" type="button" class="fa fa-bars dragon-handle" aria-labelledby="band-button-4 band-text-4" aria-pressed="false" data-drag-on="false"></button>
+                <label>
+                    <input ng-required="all_dependencies_topics[topic.name]"
+                           ng-change="check_for_topic_dependencies();"
+                           ng-model="selected_topics[topic.name]"
+                           data-dependency-order-validation
+                           name="topic_checkbox_{{topic.name}}" type="checkbox" class="filled-in">
+                    <span data-topic-name="{{topic.name}}">{{topic.name}}</span>
+                    <span data-topic-dependencies="{{topic.dependencies_topics}}">{{topic.dependencies_topics.length ? "- Dependencies: " + topic.dependencies_topics : ""}}</span>
+                </label>
+                <div style="padding-left: 55px;" ng-show="selected_topics[topic.name]" ng-repeat="task in topic.related_tasks">
+                    <label>
+                        <input type="checkbox">
+                        <span data-task-id="{{task._id}}">{{task.title}}</span>
+                    </label>
+                </div>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col s6">

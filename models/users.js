@@ -263,12 +263,12 @@ exports.get_current_plan_task = async (req, res, next) => {
     let current_task = await tasks_model.get(req, res, next);
 
     if (user_plan_data.current_task.status === "Completed") {
-        current_task = tasks_model.system_tasks.plan_completed;
+        current_task = [tasks_model.system_tasks.plan_completed];
     }
 
     if (current_task.check_point === "STRONG") {
         if (user_plan_data.current_task.status !== "In Progress") {
-            current_task = tasks_model.system_tasks.strong_check_point;
+            current_task = [tasks_model.system_tasks.strong_check_point];
         }
     }
 
@@ -569,6 +569,7 @@ exports.submit_task = async (req, res, next) => {
     let plan_id = await plans_model.get_plan_id(req);
     let task_details = await tasks_model.get(req, res, next);
     task_details = task_details[0];
+    req.query.task_id = task_id;
     let next_task_id = await plans_model.get_plan_next_mission_id(req);
 
     // Test submitted answer

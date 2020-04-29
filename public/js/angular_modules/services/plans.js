@@ -50,6 +50,7 @@ angular.module("plansM", [])
         };
 
         this.get_plan_details = (plan_name, success_cb, error_cb, cb) => {
+            let deferred = $.Deferred();
             _$http({
                 method: "GET",
                 url: "/api/plans/p" + plan_name,
@@ -59,12 +60,15 @@ angular.module("plansM", [])
                 alertify.success(response.message);
                 _$scope.plan_data = response.data[0];
                 success_cb && success_cb(_$scope.plan_data);
+                deferred.resolve(_$scope.plan_data);
             }, (response) => {
                 response = response.data;
                 alertify.error(response.message);
                 error_cb && error_cb();
+                deferred.reject("Failed");
             }).finally(() => {
                 cb && cb();
             });
+            return deferred.promise();
         }
     });

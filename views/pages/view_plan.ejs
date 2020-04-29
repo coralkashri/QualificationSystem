@@ -67,16 +67,19 @@
                     </div>
                 </div>
 
+
+                <!--Answer Parts-->
+
                 <div ng-if="task_details.answer_type === 'TEXT_STRONG'" class="row">
                     <div class="input-field col s12">
-                        <input id="text_strong_answer" ng-model="learner_answer" type="text" >
+                        <input id="text_strong_answer" ng-model="$parent.learner_answer" type="text" >
                         <label for="text_strong_answer">Answer</label>
                     </div>
                 </div>
 
                 <div ng-if="['TEXT_SOFT', 'TEXT_FREE'].includes(task_details.answer_type)" class="row">
                     <div class="input-field col s12">
-                        <textarea id="text_answer" ng-model="learner_answer" class="validate materialize-textarea"></textarea>
+                        <textarea id="text_answer" ng-model="$parent.learner_answer" class="validate materialize-textarea"></textarea>
                         <label for="text_answer">Answer</label>
                     </div>
                 </div>
@@ -97,7 +100,7 @@
 
                 <div ng-if="task_details.answer_type === 'COMPILATION_RESULT'" class="row">
                     <div class="col s12">
-                        <div class='ace-editor' ace='create_answer_code_section' ng-model='learner_answer'></div>
+                        <div class='ace-editor' ace='create_answer_code_section' ng-model='$parent.learner_answer'></div>
                     </div>
                     <div class="col s12">
                         <!--TODO compile answer-->

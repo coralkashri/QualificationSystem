@@ -11,10 +11,18 @@ angular.module("adminPlansM", [])
             _modals = modals_manager;
 
             _$scope.create_plan = (plan_data) => {
+                // Route calculating
+                let topics_container = $("#route_editing");
+                let not_selected_topics = topics_container.find("input[type='checkbox']:not(:checked)");
+                not_selected_topics.parent().parent().remove();
+                let selected_tasks_elements = topics_container.find("[data-task-id]");
+                let selected_task_ids = [];
+                selected_tasks_elements.toArray().forEach(elem => selected_task_ids.push($(elem).attr("data-task-id")));
+
                 let params = $.param({
                     description: plan_data.description,
                     estimated_days: plan_data.estimated_days,
-                    tasks_route: plan_data.tasks_route,
+                    tasks_route: JSON.stringify(selected_task_ids),
                     active_status: !!plan_data.is_active
                 });
                 _$http({
@@ -33,12 +41,21 @@ angular.module("adminPlansM", [])
             };
 
             _$scope.modify_plan = (target_plan_name, plan_data) => {
+                // Route calculating
+                let topics_container = $("#route_editing");
+                let not_selected_topics = topics_container.find("input[type='checkbox']:not(:checked)");
+                not_selected_topics.parent().parent().remove();
+                let selected_tasks_elements = topics_container.find("[data-task-id]");
+                let selected_task_ids = [];
+                selected_tasks_elements.toArray().forEach(elem => selected_task_ids.push($(elem).attr("data-task-id")));
+
+                // Prepare params
                 let params = $.param({
                     new_plan_name: plan_data.name,
                     new_description: plan_data.description,
                     new_estimated_days: plan_data.estimated_days,
-                    new_tasks_route: plan_data.tasks_route,
-                    active_status: !!plan_data.is_active
+                    new_tasks_route: JSON.stringify(selected_task_ids),
+                    active_status: !!plan_data.is_active,
                 });
                 _$http({
                     method: "POST",

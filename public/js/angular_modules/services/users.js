@@ -120,6 +120,9 @@ angular.module("usersM", [])
             let deferred = $.Deferred();
             _preloader.start();
 
+            let pre_params = {};
+            pre_params.answer = [];
+
             // Read answer
             let promises = [];
             if (!learner_answer) {
@@ -137,16 +140,27 @@ angular.module("usersM", [])
                         }));
                         break;
                 }
+            } else {
+                pre_params.answer = learner_answer;
             }
 
-            Promise.all(promises).then(() => {
+            Promise.all(promises).then((responses) => {
+                // Get file names
+                for (let i = 0; i < responses.length; i++) {
+                    let response = responses[i].data.data;
+                    pre_params.answer.push.apply(pre_params.file_names, response);
+                }
+
+                let params = $.param(pre_params);
+
                 _$http({
                     method: "POST",
                     url: "/api/users/u" + username + "/plans/" + plan_name + "/submit/" + task_details._id,
+                    data: params,
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'}
                 }).then((response) => {
                     response = response.data;
-                    $scope.task_submit_result = response.data[0];
+                    _$scope.task_submit_result = response.data[0];
                     $("#task_submit_result_modal").modal('open');
                     deferred.resolve(_$scope.task_details);
                 }, (response) => {

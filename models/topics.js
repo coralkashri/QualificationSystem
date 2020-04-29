@@ -55,6 +55,57 @@ let get_topic_id = async (req, res, next) => {
 
 exports.get_topic_id = get_topic_id;
 
+/**
+ * @see Algorithm based on: https://www.electricmonk.nl/docs/dependency_resolving_algorithm/dependency_resolving_algorithm.pdf
+ *
+ * @throws Assert exception if circular dependency detected
+ */
+let circular_dependency_detector = async (topic_name, new_dependencies) => {
+    // Get DB
+    let topics_db_model = database.topics_model();
+
+    let all_topics = await topics_db_model.find({}).exec();
+
+    function find_topic_by_name(topics_list, topic_name) {
+        return all_topics.find(topic => topic.name === topic_name);
+    }
+
+    function is_topic_name_exists(topic_names_list, topic_name) {
+        return typeof topic_names_list.find(name => name === topic_name) != "undefined";
+    }
+
+    /**
+     * @throws Assert exception if circular dependency detected
+     *
+     * @param topic - Full topic data (name, dependencies_topics)
+     * @param resolved - Fully check topics
+     * @param seen -At first send []
+     */
+    function check_dependencies(topic, resolved, seen) {
+        seen.push(topic.name);
+        if (topic.name === topic_name)
+            topic.dependencies_topics = new_dependencies;
+        for (let i = 0; i < topic.dependencies_topics.length; i++) {
+            let current_dependency = find_topic_by_name(all_topics, topic.dependencies_topics[i]);
+            if (!is_topic_name_exists(resolved, current_dependency.name)) {
+                assert.ok(!is_topic_name_exists(seen, current_dependency.name), "Circular dependency in topics list detected.");
+                check_dependencies(current_dependency, resolved, seen);
+            }
+        }
+        resolved.push(topic.name);
+    }
+
+    let resolved = [];
+    all_topics.forEach(topic => {
+        if (!is_topic_name_exists(resolved, topic.name)) {
+            check_dependencies(topic, resolved, []);
+        }
+    })
+};
+
+
+// API
+
 exports.get = async (req, res, next) => {
     // Get DB
     let topics_db_model = database.topics_model();
@@ -115,6 +166,7 @@ exports.create = async (req, res, next) => {
         name: target_topic,
         description: topic_description
     };
+
     requests_handler.validate_and_set_array_optional_input(topic_dependencies, data, "dependencies_topics");
     if (req.session.user.role >= access_limitations.min_access_required.archive_topics)
         requests_handler.validate_and_set_basic_optional_input(topic_active_status, data, "is_active");
@@ -149,6 +201,11 @@ exports.modify = async (req, res, next) => {
     requests_handler.validate_and_set_basic_optional_input(new_topic_name, data, "name");
     requests_handler.validate_and_set_basic_optional_input(new_topic_description, data, "description");
     requests_handler.validate_and_set_array_optional_input(new_topic_dependencies, data, "dependencies_topics");
+    if (data.dependencies_topics) {
+        // Circular dependency validator
+        await circular_dependency_detector(target_topic, data.dependencies_topics);
+    }
+
     if (req.session.user.role >= access_limitations.min_access_required.archive_topics)
         requests_handler.validate_and_set_basic_optional_input(new_topic_active_status, data, "is_active");
 

@@ -1,3 +1,5 @@
+<span ng-init="init_plans_page();"></span>
+
 <% if (typeof action === 'undefined') { %>
     <%- include('view_list_pages/plans.ejs'); %>
 <% } else if (action == "view" && typeof plan_name_for_details !== "undefined") { %>

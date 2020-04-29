@@ -6,6 +6,8 @@ let database = require('../helpers/db_controllers/services/db').getDB();
 let requests_handler = require('../helpers/requests_handler');
 const access_limitations = require('../helpers/configurations/access_limitations');
 let users_model = require('./users');
+let topics_model = require('./topics');
+let tasks_model = require('./tasks');
 
 // Value extract / calculate functions
 
@@ -155,6 +157,43 @@ let get_plan_next_mission_id = async (req, res, next) => {
 
 exports.get_plan_next_mission_id = get_plan_next_mission_id;
 
+/**
+ * @param req
+ * req["query"]["route"] - Task ids array
+ *
+ * @throws Assert exception on dependencies issues
+ */
+let validate_tasks_route = async (req, res, next) => {
+
+    let route = requests_handler.require_param(req, "get", "route");
+    route = JSON.parse(route);
+
+    // Get each task topic_id
+    let topics = [];
+    for (let i = 0; i < route.length; i++) {
+        req.params.task_id = route[i];
+        let task_data = (await tasks_model.get(req, {}, {}))[0];
+        topics.push({id: task_data.topic_id});
+    }
+
+    // For each topic get dependencies list
+    for (let i = 0; i < topics.length; i++) {
+        req.params.topic_id = topics[i].id;
+        let topic_data = (await topics_model.get(req, {}, {}))[0];
+        topics[i].dependencies = topic_data.dependencies_topics;
+        topics[i].name = topic_data.name;
+    }
+
+    // Go from the end of the topics list to the current topic, and check if the current one is dependency of another
+    for (let topic_number = 1; topic_number < topics.length; topic_number++) {
+        let current_topic_name = topics[topic_number].name;
+
+        for (let suspect_number = topic_number - 1; suspect_number < topic_number; suspect_number++) {
+            assert.ok(!topics[suspect_number].dependencies.includes(current_topic_name), "Wrong tasks' topics dependencies order.")
+        }
+    }
+};
+
 
 // API
 
@@ -226,6 +265,13 @@ exports.create = async (req, res, next) => {
         estimated_days: plan_estimated_days
     };
     requests_handler.validate_and_set_array_optional_input(plan_route, data, "route");
+
+    // Validate tasks route
+    if (plan_route) {
+        req.query.route = plan_route;
+        await validate_tasks_route(req, res, next);
+    }
+
     if (req.user.role >= access_limitations.min_access_required.archive_plans)
         requests_handler.validate_and_set_basic_optional_input(plan_active_status, data, "is_active");
 
@@ -263,6 +309,12 @@ exports.modify = async (req, res, next) => {
     requests_handler.validate_and_set_array_optional_input(new_plan_route, data, "route");
     if (req.user.role >= access_limitations.min_access_required.archive_plans)
         requests_handler.validate_and_set_basic_optional_input(new_active_status, data, "is_active");
+
+    // Validate tasks route
+    if (new_plan_route) {
+        req.query.route = new_plan_route;
+        await validate_tasks_route(req, res, next);
+    }
 
     // Prepare query
     let filter = {name: target_plan};

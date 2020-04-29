@@ -3,7 +3,7 @@ angular.element(document).ready(() => {
 });
 
 const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 'timersM', 'modalsM', 'plansM',
-    'topicsM', 'aceM', 'adminUsersM', 'adminPlansM', 'adminTopicsM', 'adminTasksM'])
+    'topicsM', 'aceM', 'adminUsersM', 'adminPlansM', 'adminTopicsM', 'adminTasksM', 'globalM'])
 
     .controller('body_controller', ($scope, $http, $window, $interval, $timeout, $location, $compile, preloader, dark_area,
                                     timers_manager_s, modals_s, plans_s, topics_s, admin_users_s, admin_plans_s,
@@ -18,6 +18,11 @@ const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 
         admin_topics_s.init($scope, $http, timers_manager_s, modals_s, preloader);
         admin_tasks_s.init($scope, $http, timers_manager_s, modals_s, preloader);
 
+        $scope.utils = {
+            keys : Object.keys,
+            values : Object.values
+        };
+
         $scope.get_user_details = (username) => {
             admin_users_s.get_user_details(username, (data) => {
                 $('#user_role').val(data.role);
@@ -31,9 +36,11 @@ const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 
 
         /**
          * @override the one declared in plans_s
+
+         * @returns Promise
          */
         $scope.get_plan_details = (plan_name) => {
-            plans_s.get_plan_details(plan_name, (data) => {
+            return plans_s.get_plan_details(plan_name, (data) => {
                 $interval(() => {
                     $scope.original_plan_name = data.name;
                     $timeout(() => {
@@ -42,6 +49,159 @@ const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 
                     }, 100);
                 }, 10, 50);
             });
+        };
+
+        $scope.init_plans_page = () => {
+
+            // Function Definitions
+
+            /**
+             * @param topics_list - Topics list
+             * @param topic_name - Target topic
+             * @returns If found - topic_id, Else undefined.
+             */
+            function get_topic_id_by_name(topics_list, topic_name) {
+                let selected_topic = topics_list.find(topic => topic.name === topic_name);
+                return selected_topic ? selected_topic._id : undefined;
+            }
+
+            /**
+             * @param tasks_list - Tasks list
+             * @param target_task - Target task id
+             * @returns If found - task data, Else undefined.
+             */
+            function get_task_data_by_id(tasks_list, target_task) {
+                return tasks_list.find(task => task._id === target_task);
+            }
+
+            /**
+             * @description Restore currently plan tasks route
+             */
+            function restore_currently_plan_tasks_route() {
+                let plan_route = $scope.plan_data.route;
+                let ordered_topics = [];
+                plan_route.forEach(task_id => {
+                    $timeout(() => {
+                        $("[data-task-id='" + task_id + "']").trigger("click");
+                    }, 300);
+                    // Reorder topics by currently inner plan order
+                    let current_task_data = get_task_data_by_id($scope.tasks_list, task_id);
+                    if (!ordered_topics.includes(current_task_data.topic_id)) {
+                        ordered_topics.push(current_task_data.topic_id);
+                        let current_topic = $scope.topics_data_with_tasks_list[current_task_data.topic_id];
+                        current_topic.topic_order = ordered_topics.length;
+                        $scope.selected_topics[current_topic.name] = true;
+                    }
+                });
+            }
+
+            /**
+             *
+             */
+            function prepare_topics_reordering() {
+                const route_editing = document.getElementById("route_editing");
+                const dragonDrop = new DragonDrop(route_editing, {
+                    handle: '.dragon-handle',
+                    announcement: {
+                        //grabbed: el => `${el.querySelector('span').innerText} grabbed`,
+                        dropped: (el) => {
+                            let items = $("#route_editing>div");
+                            const current_element_pos = items.index(el);
+                            const current_topic_name = items[current_element_pos].querySelector("[data-topic-name]").getAttribute("data-topic-name");
+                            /*for (let i = 0; i < current_element_pos; i++) {
+                                let dependencies = items[i].querySelector("[data-topic-dependencies]").getAttribute("data-topic-dependencies");
+                                if (dependencies.includes(current_topic_name)) {
+                                    items[current_element_pos].classList.add("invalid");
+                                }
+                            }*/
+                            $timeout(() => {
+                                $scope.plan_form["topic_checkbox_" + current_topic_name].$validate();
+                            }, 100);
+                        },
+                        reorder: (el, items) => {
+                            console.log("admin_panel.js::Reorder function");
+                            return "Reorder - Not working";
+                        },
+                        cancel: 'Reranking cancelled.'
+                    }
+                });
+            }
+
+            /**
+             *
+             */
+            function prepare_topics_map_by_id_variable() {
+                let map_topics_by_id = {};
+                let current_topic;
+                for (let i = 0; i < $scope.topics_list.length; i++) {
+                    current_topic = $scope.topics_list[i];
+                    map_topics_by_id[current_topic._id] = current_topic;
+                    map_topics_by_id[current_topic._id].related_tasks = [];
+                }
+                let current_task;
+                for (let i = 0; i < $scope.tasks_list.length; i++) {
+                    current_task = $scope.tasks_list[i];
+                    map_topics_by_id[current_task.topic_id].related_tasks.push(current_task);
+                }
+                $scope.topics_data_with_tasks_list = map_topics_by_id;
+            }
+
+            /**
+             *
+             */
+            $scope.check_for_topic_dependencies = () => {
+                let new_dependencies = [];
+                for (let topic_name in $scope.selected_topics) {
+                    if ($scope.selected_topics.hasOwnProperty(topic_name) && $scope.selected_topics[topic_name]) {
+                        let topic_id = get_topic_id_by_name($scope.topics_list, topic_name);
+                        let topic = $scope.topics_data_with_tasks_list[topic_id];
+                        topic.dependencies_topics.forEach(dependency => {
+                            new_dependencies[dependency] ? new_dependencies[dependency].push(topic_name) : new_dependencies[dependency] = [topic_name];
+                        });
+                    }
+                }
+                $scope.all_dependencies_topics = new_dependencies;
+            };
+
+
+            // Custom operation pages initializations functions
+
+            $scope.init_create_new_plan_page = () => {
+                // Scope variables initializations
+                $scope.plan_data = {};
+                $scope.selected_topics = {};
+
+                prepare_topics_reordering();
+
+                let promises = [];
+                promises.push($scope.get_all_topics());
+                promises.push($scope.get_all_tasks());
+
+                Promise.all(promises).then(() => {
+                    $timeout(() => {
+                        prepare_topics_map_by_id_variable();
+                    }, 100);
+                });
+            };
+
+            $scope.init_modify_plan_page = (plan_name) => {
+                // Scope variables initializations
+                $scope.selected_topics = {};
+
+                prepare_topics_reordering();
+
+                let promises = [];
+                promises.push($scope.get_plan_details(plan_name));
+                promises.push($scope.get_all_topics());
+                promises.push($scope.get_all_tasks());
+
+                Promise.all(promises).then(() => {
+                    prepare_topics_map_by_id_variable();
+
+                    // Restore currently plan tasks route
+                    restore_currently_plan_tasks_route();
+                });
+            };
         };
 
         let prepare_data_for_chips = (data) => {
