@@ -331,9 +331,12 @@ exports.get = async (req, res, next) => {
     // Get DB
     let users_db_model = database.users_model();
 
-    // Extract param
+    // Extract params
     let username = requests_handler.optional_param(req, "route", "username");
-
+    let password = requests_handler.optional_param(req, "get", "password");
+    if (password) {
+        password = hash(password);
+    }
     // Validation
     validate_user_access_to_user_data(req, username);
 
@@ -347,11 +350,14 @@ exports.get = async (req, res, next) => {
 
     // Arrange data
     let query = {};
-    if (username) { // Get specific user by id
+    if (username) { // Get specific user by username
         query.username = username;
-        if (!req.user) { // [For login / self profile view actions] If not logged in already OR the current user is not an admin, require password
-            let password = requests_handler.require_param(req, "get", "password");
-            query.password = hash(password);
+        if (!req.user) { // [For login] If not logged in already require password
+            // Validation
+            assert.ok(password, "Password is required.");
+        }
+        if (password) {
+            query.password = password;
         }
     } else { /* Get all users */ }
 
@@ -396,14 +402,16 @@ exports.modify = async (req, res, next) => {
 
     // Get main param
     let username = requests_handler.require_param(req, "route", "username");
-    let current_password;
+    let current_password = requests_handler.optional_param(req, "post", "current_password");
+    if (current_password) {
+        current_password = hash(current_password);
+    }
 
     assert.ok(!!req.session.user, "User disconnected, please login.");
 
     // Get params
     if (req.session.user.role < access_limitations.min_access_required.modify_all_users) {
-        current_password = requests_handler.require_param(req, "post", "current_password");
-        current_password = hash(current_password);
+        assert.ok(current_password, "Password is required.");
     }
     let new_username = requests_handler.optional_param(req, "post", "username");
     let new_password = requests_handler.optional_param(req, "post", "password");
@@ -413,7 +421,12 @@ exports.modify = async (req, res, next) => {
     // Pre Validations
     // TODO Add a password validation for the current logged in user -- Even for administrator, to make sure that he is the one that send the request.
 
-    assert.ok(await is_username_exists({ query: {username} }), "User not found"); // If not exists, throw error
+    if (!current_password) {
+        assert.ok(await is_username_exists({query: {username}}), "User not found"); // If not exists, throw error
+    } else {
+        req.query.password = req.body.current_password;
+        assert.ok((await exports.get(req)).length > 0, "Wrong validation password.");
+    }
 
     let last_admin_validation = await last_admin_user_validation(username, "Modify", new_role);
     assert.ok(!last_admin_validation, "Attention! This is the last admin user. You can't modify it's role or you won't be able to access as admin anymore."); // If last admin will be lost, throw error
@@ -437,7 +450,7 @@ exports.modify = async (req, res, next) => {
         new: true // Return the new object after the update is applied
     }).exec();
 
-    // Post Validation
+    // Post Validations
     assert.equal(new_user.ok, true, "Target user update failed.");
 
     return new_user;

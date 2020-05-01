@@ -118,7 +118,7 @@ exports.get_users = async (req, res, next) => {
 
 exports.get_user = async (req, res, next) => {
     try {
-        let user = await users_model.get(req, res, next); // by id
+        let user = await users_model.get(req, res, next); // by username
         return responses_gen.generate_response(res, 200, user, "User successfully restored.");
     } catch (e) {
         return responses_gen.generate_response(res, 400, null, e.message);

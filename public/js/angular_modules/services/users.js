@@ -107,6 +107,43 @@ angular.module("usersM", [])
                 return deferred.promise();
             };
 
+            _$scope.edit_profile = (current_username, current_password, user_data) => {
+                let deferred = $.Deferred();
+                _preloader.start();
+
+                let route = "/api/users/modify/" + current_username;
+
+                let pre_params = {
+                    current_password: current_password
+                };
+                let new_username = user_data.username;
+                let new_password = user_data.password;
+                if (new_username) pre_params.username = new_username;
+                if (new_password) pre_params.password = new_password;
+
+                let params = $.param(pre_params);
+                _$http({
+                    method: "POST",
+                    url: route,
+                    data: params,
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                }).then((response) => {
+                    response = response.data;
+                    alertify.success(response.message);
+                    deferred.resolve(response.message);
+                    if (new_username) {
+                        location.href = "/view/users/" + new_username+ "/profile"
+                    }
+                }, (response) => {
+                    response = response.data;
+                    alertify.error(response.message);
+                    deferred.reject(response.message);
+                }).finally(() => {
+                    _preloader.stop();
+                });
+                return deferred.promise();
+            };
+
             _$scope.submit_task = (task_details, learner_answer, username, plan_name) => {
                 this.submit_task(task_details, learner_answer, username, plan_name);
             };
@@ -114,6 +151,27 @@ angular.module("usersM", [])
             _$scope.skip_task = (task_details, username, plan_name) => {
                 this.skip_task(task_details, username, plan_name);
             };
+        };
+
+        this.get_user_details = (username) => {
+            let deferred = $.Deferred();
+            _preloader.start();
+            _$http({
+                method: "GET",
+                url: "/api/users/u" + username,
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+            }).then((response) => {
+                response = response.data;
+                _$scope.user_data = response.data[0];
+                deferred.resolve(_$scope.user_data);
+            }, (response) => {
+                response = response.data;
+                alertify.error(response.message);
+                deferred.reject(response.message);
+            }).finally(() => {
+                _preloader.stop();
+            });
+            return deferred.promise();
         };
 
         this.submit_task = (task_details, learner_answer, username, plan_name) => {

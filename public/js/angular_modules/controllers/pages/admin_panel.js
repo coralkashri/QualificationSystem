@@ -2,15 +2,16 @@ angular.element(document).ready(() => {
     init_materialize();
 });
 
-const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 'timersM', 'modalsM', 'plansM',
-    'topicsM', 'aceM', 'adminUsersM', 'adminPlansM', 'adminTopicsM', 'adminTasksM', 'globalM'])
+const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 'timersM', 'modalsM',
+    'globalDataM', 'plansM', 'topicsM', 'aceM', 'adminUsersM', 'adminPlansM', 'adminTopicsM', 'adminTasksM', 'globalM'])
 
     .controller('body_controller', ($scope, $http, $window, $interval, $timeout, $location, $compile, preloader, dark_area,
-                                    timers_manager_s, modals_s, plans_s, topics_s, admin_users_s, admin_plans_s,
+                                    timers_manager_s, modals_s, plans_s, topics_s, users_roles_s, admin_users_s, admin_plans_s,
                                     admin_topics_s, admin_tasks_s) => {
         ng_init_sidenav(dark_area);
         modals_s.init($scope, preloader, dark_area);
         timers_manager_s.init($scope, $http, $timeout, preloader);
+        users_roles_s.init($scope);
         plans_s.init($scope, $http, timers_manager_s, preloader);
         topics_s.init($scope, $http, timers_manager_s, preloader);
         admin_users_s.init($scope, $http, preloader);

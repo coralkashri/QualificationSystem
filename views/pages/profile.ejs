@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="global_app" ng-cloak>
+
+<head>
+    <% include ../partials/global/basic_head.ejs %>
+    <script type="text/javascript" src="/js/angular_modules/services/global_data.js"></script>
+    <script type="text/javascript" src="/js/angular_modules/services/users.js"></script>
+    <script type="text/javascript" src="/js/angular_modules/controllers/pages/profile.js"></script>
+    <title>Qualification System - Admin Panel</title>
+</head>
+<body class="rtl" ng-controller="body_controller" data-ng-init="init()">
+<!--<video style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;" src="/resources/images/background.mp4" autoplay="autoplay" loop="loop"></video>-->
+
+<%- include('../partials/global/nav', {page: 'admin_panel', page_view_name: 'Profile'});%>
+
+<div id="page_content">
+    <br><br><br><br>
+    <div style="padding: 0 0.75rem;" class="row">
+        <% let menu_links = [
+            {
+                link: '/view/users/' + username + '/profile',
+                name: 'Profile'
+            }, {
+                link: '#',
+                name: 'Completed Tasks (Soon)'
+            }, {
+                link: '#',
+                name: 'Tasks In Review (Soon)'
+            }, {
+                link: '#',
+                name: 'Failed Tasks (Soon)'
+            }
+        ]%>
+
+        <%- include('../partials/global/menu', {menu_links: menu_links, current_page: 'profile'}) %>
+
+        <div class="col s12 m9 l10">
+            <div ng-init="get_user_details('<%=username%>')">
+                <h4><%=username%> (Role: {{get_role_name(user_data.role)}})</h4><br>
+                <form name="form" novalidate angular-validator angular-validator-submit="edit_profile('<%=username%>', validation_password, user_data);">
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input id="validation_password" name="validation_password" type="password"
+                                   ng-model="validation_password"
+                                   validate-on="blur"
+                                   required-message="'Enter your current password.'"
+                                   required class="validate">
+                            <label for="validation_password">Validation Password</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input id="username" name="username" type="text" ng-model="user_data.username" class="validate">
+                            <label for="username">Username</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input id="new_password" name="new_password" type="password" ng-model="user_data.password" class="validate">
+                            <label for="new_password">New Password</label>
+                        </div>
+                        <div class="input-field col s12">
+                            <input id="confirm_password" name="confirm_password" type="password" ng-model="confirm_password"
+                                   ng-required="new_password"
+                                   validator="user_data.password === confirm_password"
+                                   validate-on="dirty"
+                                   invalid-message="'Passwords do not match!'"
+                                   class="validate">
+                            <label for="confirm_password">Confirm Password</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col s6">
+                            <button type="submit" class="col s12 waves-effect waves-green btn-flat">Update</button>
+                        </div>
+                        <div class="col s6">
+                            <button type="reset" class="col s12 waves-effect waves-red btn-flat">Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%include ../partials/global/footer.html%>
+
+</body>
+</html>

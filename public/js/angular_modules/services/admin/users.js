@@ -2,7 +2,6 @@ angular.module("adminUsersM", [])
 
     .service("admin_users_s", function() {
         let _$scope, _$http, _preloader;
-        let role_names = ["Banned", "User", "Manger", "Admin"];
 
         this.init = ($scope, $http, preloader) => {
             _$scope = $scope;
@@ -30,10 +29,6 @@ angular.module("adminUsersM", [])
                 }).finally(() => {
                     _preloader.stop();
                 });
-            };
-
-            _$scope.get_role_name = (role_number) => {
-                return role_names[role_number];
             };
 
             _$scope.create_user = () => {
