@@ -12,15 +12,16 @@ A qualification system for new team members.
     * Judgement Criteria
     * Answer type:
         * Auto Check Answers:
-            * TEXT_STRONG
-            * TEXT_SOFT
-            * BOOLEAN
-            * MULTIPLE_CHOICES
+            * TEXT_STRONG - Password/CTF
+            * TEXT_SOFT - Regex checking
+            * BOOLEAN - Multiple options - Single choice
+            * MULTIPLE_CHOICES - Multiple options - Multiple choice
         * Human Check Answers:
             * Free Text
             * Custom Files
 * Register to plans.
 * Tasks submission.
+* Auto answers check.
 * Archive/Reactivate plans.
 * Users privileges:
     * Admin & Manager   -> Create/Modify/Remove/Archive Users & Plans & Topics & Tasks.
