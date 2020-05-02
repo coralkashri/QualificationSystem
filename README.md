@@ -3,11 +3,39 @@
 Web-based application of qualification system for new team members.
 
 # Description
-An interactive web-based application to design a road map for new team members
-/ general qualification (see [developers road map](https://github.com/kamranahmedse/developer-roadmap)).
-Create plans, topics, and tasks, and apply different topics and unique topics order for each plan.
+An interactive web-based application to design a road map for new team members / general qualification
+(see [developers road map](https://github.com/kamranahmedse/developer-roadmap)). Create plans, topics, and tasks,
+and apply different topics and unique topics order for each plan.
 
 **Compatible with offline systems.**
+
+# Qualification System Demo
+[Qualification System Demo](https://qualification-plan-demo.herokuapp.com/)
+
+# Dependencies
+* [node.js](https://nodejs.org/en/).
+* [mongodb](https://www.mongodb.com/).
+
+# Run
+```
+sudo service mongod start # make sure to start mongodb service
+node ./app.js
+```
+
+## Access Server
+```
+# On browser [chrome recommended]: localhost:5000
+```
+
+## Configuration
+At the first time you run the system, admin user is automatically generated.
+```
+username: admin
+password: admin
+```
+You can modify this user after login into it using ```Sidebar -> Admin Panel -> Users Management -> admin```
+
+WARNING! Don't lose your admin user credentials.
 
 # Stabled Features
 * Users & Plans & Topics & Tasks management.
@@ -47,9 +75,6 @@ Create plans, topics, and tasks, and apply different topics and unique topics or
 * Compatible with offline systems.
 * Cross-Platform application.
 * Responsive to Phones & Tablets & PC.
-
-# Qualification System Demo
-[Qualification System Demo](https://qualification-plan-demo.herokuapp.com/)
 
 # TODO
 * Some validations.
