@@ -121,12 +121,12 @@
                             {{task_data.answer_options[0]}}
                         </div>
                         <div class="col s2 m1">
-                            <a class="btn-small btn-floating waves-effect waves-light" ng-click="edit_list_item(task_data.answer_options, 0);">
+                            <a class="btn-small btn-floating waves-effect waves-light" ng-click="edit_list_item(task_data.answer_options, task_data.answer_options[0]);">
                                 <i class="material-icons">edit</i>
                             </a>
                         </div>
                         <div class="col s2 m1">
-                            <a class="btn-small btn-floating waves-effect waves-light" ng-click="delete_list_item(task_data.answer_options, 0, 'task_answer_boolean_option_');">
+                            <a class="btn-small btn-floating waves-effect waves-light" ng-click="delete_list_item(task_data.answer_options, task_data.answer_options[0], 'task_answer_boolean_option_');">
                                 <i class="material-icons">delete</i>
                             </a>
                         </div>

@@ -353,13 +353,13 @@ const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 
                                 </div> \
                                 <div class='col s2 m1'>\
                                     <a class=\"btn-small btn-floating waves-effect waves-light\"\
-                                       ng-click='edit_list_item(task_data.answer_options, " + current_option_number + ")'> \
+                                       ng-click='edit_list_item(task_data.answer_options, task_data.answer_options[" + current_option_number + "])'> \
                                         <i class=\"material-icons\">edit</i> \
                                     </a>\
                                 </div>\
                                 <div class='col s2 m1'>\
                                     <a class='btn-small btn-floating waves-effect waves-light'\
-                                       ng-click='delete_list_item(task_data.answer_options, " + current_option_number + ", \"task_answer_boolean_option_\");'>\
+                                       ng-click='delete_input_row(\"task_answer_boolean_option_" + current_option_number + "\", task_data.answer_options, " + current_option_number + ");'>\
                                         <i class='material-icons'>delete</i>\
                                     </a>\
                                 </div>\
