@@ -1,4 +1,13 @@
-A qualification system for new team members.
+# Qualification System
+**Design & Apply your road map**<br>
+Web-based application of qualification system for new team members.
+
+# Description
+An interactive web-based application to design a road map for new team members
+/ general qualification (see [developers road map](https://github.com/kamranahmedse/developer-roadmap)).
+Create plans, topics, and tasks, and apply different topics and unique topics order for each plan.
+
+**Compatible with offline systems.**
 
 # Stabled Features
 * Users & Plans & Topics & Tasks management.
@@ -23,6 +32,8 @@ A qualification system for new team members.
 * Tasks submission.
 * Auto answers check.
 * Archive/Reactivate plans.
+* Topics dependencies (If a specific topic selected to plan, all of it's dependencies have to be selected too, and to be ordered before it).
+* Circular dependencies validation.
 * Users privileges:
     * Admin & Manager   -> Create/Modify/Remove/Archive Users & Plans & Topics & Tasks.
     * User              -> Register to plans, submit tasks, profile editing.
