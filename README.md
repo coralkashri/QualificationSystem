@@ -28,8 +28,8 @@ A qualification system for new team members.
     * Banned            -> No access at all.
 * Admin Panel:
     * Users control panel (Add / Modify / Remove).
-    * Plans control panel (Add / Modify / Remove).
-    * Topics control panel (Add / Modify / Remove).
+    * Plans control panel (Add / Modify / Remove / Archive / Reactivate).
+    * Topics control panel (Add / Modify / Remove / Archive / Reactivate).
     * Tasks control panel (Add / Modify / Remove).
 * Easy to use web-based interface, designed with [MaterializeCSS](https://materializecss.com/)
 * Compatible with offline systems.
