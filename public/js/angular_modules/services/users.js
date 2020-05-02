@@ -179,19 +179,19 @@ angular.module("usersM", [])
             _preloader.start();
 
             let pre_params = {};
-            pre_params.answer = [];
 
             // Read answer
             let promises = [];
             if (!learner_answer) {
                 switch (task_details.answer_type) {
                     case "FILES":
-                        let files_input = $("#files_answer");
+                        pre_params.answer = [];
+                        let files_input = $("#files_answer")[0];
                         let formData = new FormData();
                         for (let file_num = 0; file_num < files_input.files.length; file_num++) {
-                            formData.append("files_to_upload", files_inputs[i].files[file_num]);
+                            formData.append("files_to_upload", files_input.files[file_num]);
                         }
-                        promises.push($http.post("/api/uploads/upload", formData, {
+                        promises.push(_$http.post("/api/uploads/upload", formData, {
                             //headers: {enctype:'multipart/form-data'}
                             transformRequest: angular.identity,
                             headers: {'Content-Type': undefined, enctype: 'multipart/form-data'}
@@ -199,6 +199,8 @@ angular.module("usersM", [])
                         break;
                 }
             } else {
+                if (typeof learner_answer == "string")
+                    learner_answer = [learner_answer];
                 pre_params.answer = learner_answer;
             }
 
@@ -206,8 +208,10 @@ angular.module("usersM", [])
                 // Get file names
                 for (let i = 0; i < responses.length; i++) {
                     let response = responses[i].data.data;
-                    pre_params.answer.push.apply(pre_params.file_names, response);
+                    pre_params.answer.push.apply(pre_params.answer, response);
                 }
+
+                pre_params.answer = JSON.stringify(pre_params.answer);
 
                 let params = $.param(pre_params);
 
@@ -218,7 +222,7 @@ angular.module("usersM", [])
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'}
                 }).then((response) => {
                     response = response.data;
-                    _$scope.task_submit_result = response.data[0];
+                    _$scope.task_submit_result = response.data;
                     $("#task_submit_result_modal").modal('open');
                     deferred.resolve(_$scope.task_details);
                 }, (response) => {

@@ -9,7 +9,7 @@ exports.login = async (req, res, next) => {
         let user = await users_model.get(req, res, next); // by username & password
         if (user.length !== 0) {
             user = user[0];
-            delete user.plans; // Minimal required information in session
+            delete user._doc.plans; // Minimal required information in session
             // user.password (deleted) == hash(req.query.password)
             // sets a cookie with the user's info
             user.password = hash(hash(req.query.password)); // Single hash --> store in DB, Double hash --> Store in cookies.

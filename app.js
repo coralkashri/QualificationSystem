@@ -8,6 +8,9 @@ db = require('./helpers/db_controllers/services/db'),
 router = require("./routers/router"),
 con_validator = require('./middlewares/validate_connection');
 
+// Initialize Server Functions
+require('./helpers/custom_prototypes_functions');
+
 // Setup server
 let app = express()
 

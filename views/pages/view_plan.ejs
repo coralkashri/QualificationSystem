@@ -120,7 +120,10 @@
 
                 <div ng-if="task_details.answer_type === 'MULTIPLE_CHOICES'" class="row">
                     <label class="col s12" ng-repeat="option in task_details.answer_options">
-                        <input class="filled-in" value="{{option}}" ng-model="$parent.$parent.learner_answer[$index]" type="checkbox" />
+                        <input class="filled-in" value="{{option}}"
+                               ng-model="selection[$index]"
+                               ng-change="toggle_multiple_choices_selection(option);"
+                               type="checkbox" />
                         <span>{{option}}</span>
                     </label>
                 </div>

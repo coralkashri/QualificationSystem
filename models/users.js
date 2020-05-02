@@ -272,6 +272,10 @@ exports.get_current_plan_task = async (req, res, next) => {
         }
     }
 
+    if (current_task.length > 1) {
+        current_task = [tasks_model.system_tasks.missions_in_review];
+    }
+
     return current_task;
 };
 
@@ -567,6 +571,7 @@ exports.submit_task = async (req, res, next) => {
 
     // Get params
     let user_answer = requests_handler.require_param(req, "post", "answer");
+    user_answer = JSON.parse(user_answer);
 
     // Set params for future queries
     req.query.username = username;

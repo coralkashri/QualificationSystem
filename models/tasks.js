@@ -170,6 +170,33 @@ exports.check_answer = (answer_type, legal_answer, answer) => {
     assert.ok(is_answer_type_have_auto_check(answer_type), "Moderator check required.");
     let is_legal_answer = true;
 
+    switch (answer_type) {
+        case "TEXT_STRONG":
+        case "BOOLEAN":
+            is_legal_answer = legal_answer[0] === answer[0];
+            break;
+
+        case "TEXT_SOFT":
+            let modified_answer = answer[0];
+            legal_answer.forEach(word => {
+                let regexp = new RegExp(word, 'gi');
+                is_legal_answer = is_legal_answer && modified_answer.regexIndexOf(regexp) !== -1;
+            });
+
+        case "COMPILATION_RESULT":
+            // TODO
+            break;
+
+        case "MULTIPLE_CHOICES":
+            legal_answer.forEach(legal => {
+                is_legal_answer = is_legal_answer && answer.includes(legal);
+            });
+
+            answer.forEach(ans => {
+                is_legal_answer = is_legal_answer && legal_answer.includes(ans);
+            });
+            break;
+    }
 
     return is_legal_answer;
 };
@@ -388,6 +415,13 @@ exports.system_tasks = {
     plan_completed: {
         title: "!Congratulation!",
         details: "Congratulation! You just hit the end of the plan! Please contact your administrator and let him know.",
+        is_system_task: true
+    },
+    missions_in_review: {
+        title: "All tasks submitted - Please wait for tasks review",
+        details: "The last submitted task was a the last task in this plan, however you have unchecked submitted tasks that are waiting for a moderator review.\n" +
+            "Please contact a moderator and ask him for further instructions in the meanwhile, or if you are register to another plans, you may continue with their " +
+            "paths or learn something until moderator will be free to review your responses.",
         is_system_task: true
     }
 };

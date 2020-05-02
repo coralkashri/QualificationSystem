@@ -75,6 +75,12 @@ const app = angular.module('global_app', ['ngSanitize', 'ngAnimate', 'loaderM', 
                 }
             });
 
+            $scope.toggle_multiple_choices_selection = (selection) => {
+                $scope.learner_answer.includes(selection) ?
+                    $scope.learner_answer = $scope.learner_answer.filter(ans => ans !== selection) :
+                    $scope.learner_answer.push(selection);
+            };
+
             // Override users.submit_task
             $scope.submit_task = (task_details, learner_answer) => {
                 users_s.submit_task(task_details, learner_answer, username, plan_name);
