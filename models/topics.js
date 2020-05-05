@@ -24,6 +24,7 @@ let is_topic_exists = async (req, res, next) => {
         topic_id = requests_handler.require_param(req, "get", "topic_id");
         query = {_id: topic_id};
     } else {
+        topic_name = topic_name.replace(/([\/,!?_+])/g, '\\$1');
         query = {
             name: {
                 $regex: new RegExp('^' + topic_name.toLowerCase() + '$', 'i') // case-insensitive
