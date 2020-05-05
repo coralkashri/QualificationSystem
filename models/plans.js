@@ -21,6 +21,7 @@ let tasks_model = require('./tasks');
 let is_plan_exists = async (req, res, next) => {
     let plans_db_model = database.plans_model();
     let plan_name = requests_handler.require_param(req, "get", "plan_name");
+    plan_name = plan_name.replace(/([\/,!?_+])/g, '\\$1');
     let query = {
         name: {
             $regex: new RegExp('^' + plan_name.toLowerCase() + '$', 'i') // case-insensitive
@@ -42,6 +43,7 @@ exports.is_plan_exists = is_plan_exists;
 let is_plan_archived = async (req, res, next) => {
     let plans_db_model = database.plans_model();
     let plan_name = requests_handler.require_param(req, "get", "plan_name");
+    plan_name = plan_name.replace(/([\/,!?_+])/g, '\\$1');
     let query = {
         name: {
             $regex: new RegExp('^' + plan_name.toLowerCase() + '$', 'i') // case-insensitive
